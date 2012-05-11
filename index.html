@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="raphael/raphael.js"></script>
+    <title>HMM Logos</title>
+    <style>
+      .clearfix img {
+        position:absolute;
+        border:none;
+        top:0;
+        left:0;
+        display:none;
+      }
+      .clearfix {
+        position:relative;
+      }
+      div {
+        border: 1px solid #999;
+        height: 300px;
+      }
+    </style>
+    <script>
+
+      //var paper;
+
+      $.fn.hmm_logo = function(data) {
+        var column_width = 32;
+        var vis_width   = $(this).width();
+        var vis_height  = 300;
+        var x = 0;
+        var y = 285;
+        var column_num = 1;
+
+
+        var domNode = $(this).get();
+        paper = Raphael(domNode[0], vis_width, vis_height);
+        paper.setViewBox(0,0, vis_width, vis_height, true);
+
+        for (var i = 0; i < 3; i++) {
+          var line = paper.path("M0," + y + " H" + 50000).attr({fill:"#999", "stroke":"#999"});
+
+          y = y - 15;
+        }
+
+        y = y - 40;
+
+        var letters = ['A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A'];
+
+        paper.seq_length = letters.length;
+
+        $(letters).each(function() {
+          var nucleotide = paper.text(x + (column_width / 2), y, this).attr({fill: '#000', "font-family":"Arial", "font-size": "30px"});
+          nucleotide.scale(1,4);
+          var tick1 = paper.path("M" + x + "," + 285 + " V" + (285 + 5)).attr({fill:"#999", "stroke":"#999"});
+          var div   = paper.path("M" + x + "," + 255 + " V0").attr({fill:"#ddd", "stroke":"#ddd"});
+          var tick2 = paper.path("M" + x + "," + 270 + " V" + (270 + 5)).attr({fill:"#999", "stroke":"#999"});
+          var tick3 = paper.path("M" + x + "," + 255 + " V" + (255 + 5)).attr({fill:"#999", "stroke":"#999"});
+          var col_count = paper.text(x + (column_width / 2),  285 + 6, column_num).attr({fill: '#666', "font-family":"Arial", "font-size": "10px"});;
+          column_num++;
+          x = x + column_width;
+        });
+
+
+
+
+
+        //scroll the canvas left or right by 400px
+        $('#left').bind('mousedown', function() {
+          var x = paper._viewBox[0] - 400;
+          if (x < 0) { x = 0 };
+          paper.setViewBox(x, 0, vis_width, vis_height, true);
+        });
+
+        $('#right').bind('mousedown', function() {
+          var x = paper._viewBox[0] + 400;
+          var max = (letters.length * 30);
+          if (x > max) { x = max };
+          paper.setViewBox(x, 0, vis_width, vis_height, true);
+        });
+
+        $('#in').bind('click', function() {
+          console.info("this doesn't work yet");
+          return;
+          var x = paper._viewBox[0];
+          paper.setViewBox(x, 0, vis_width + 100, vis_height, true);
+        });
+
+        $('#out').bind('click', function() {
+          console.info("this doesn't work yet");
+          return;
+          var x = paper._viewBox[0];
+          paper.setViewBox(x, 0, vis_width - 100, vis_height, true);
+        });
+
+      }
+
+
+      $(document).ready(function() {
+        $('#graphic').hmm_logo();
+      });
+    </script>
+  </head>
+  <body>
+    <div id="graphic">
+    </div>
+    <a id="left">left</a> <a id="right">right</a> <a id="in">in</a> <a id="out">out</a>
+  </body>
+</html>
