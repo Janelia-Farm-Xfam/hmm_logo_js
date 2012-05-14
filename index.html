@@ -4,7 +4,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script type="text/javascript" src="raphael/raphael.js"></script>
+    <script type="text/javascript" src="../raphael/raphael.js"></script>
+    <script type="text/javascript" src="Arial_Black_900.font.js"></script> 
     <title>HMM Logos</title>
     <style>
       .clearfix img {
@@ -27,19 +28,31 @@
       //var paper;
 
       $.fn.hmm_logo = function(data) {
-        var column_width = 32;
+        var column_width = 34;
         var vis_width   = $(this).width();
         var vis_height  = 300;
         var x = 0;
         var y = 285;
         var column_num = 1;
+        var colors = {
+          'A': '#cbf751',
+          'C': '#5ec0cc',
+          'G': '#ffdf59',
+          'T': '#b51f16',
+          'U': '#b51f16'
+        };
+        var x_offsets = {
+          A: 10,
+          C: 8,
+          G: 4,
+          T: 19
+        };
 
 
         var domNode = $(this).get();
         paper = Raphael(domNode[0], vis_width, vis_height);
-        paper.setViewBox(0,0, vis_width, vis_height, true);
 
-        for (var i = 0; i < 3; i++) {
+        for (var i = 0; i < 2; i++) {
           var line = paper.path("M0," + y + " H" + 50000).attr({fill:"#999", "stroke":"#999"});
 
           y = y - 15;
@@ -47,23 +60,113 @@
 
         y = y - 40;
 
-        var letters = ['A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A','A','C','G','T','G','T','G','T','C','G','C','G','C','G','A'];
+        var columns = [
+          ['A:0.25','G:0.25','C:0.25','T:0.25'],
+          ['A:0.6','G:0.02','C:0.03','T:0.04'],
+          ['A:1','G:0','C:0','T:0'],
+          ['A:0','G:0','C:0','T:1'],
+          ['C:0.5','G:0.5','A:0','T:0'],
+          ['A:0','G:0','C:0','T:0'],
+          ['A:0.01','G:0.7','C:0.2','T:0.01'],
+          ['A:0.01','G:0.01','C:0.02','T:0.01'],
+          ['C:0.1','G:0.4','A:0.1','T:0.01'],
+          ['A:0.6','G:0.02','C:0.03','T:0.04'],
+          ['A:0.01','G:0.7','C:0.2','T:0.01'],
+          ['A:0.01','G:0.01','C:0.02','T:0.01'],
+          ['A:0.1','G:0.4','C:0.1','T:0.01'],
+          ['A:0.6','G:0.02','C:0.03','T:0.04'],
+          ['A:0.01','G:0.7','C:0.2','T:0.01'],
+          ['A:0.01','G:0.01','C:0.02','T:0.01'],
+          ['A:1','G:0','C:0','T:0'],
+          ['A:0.9','G:0','C:0','T:0'],
+          ['A:0.8','G:0','C:0','T:0'],
+          ['A:0.7','G:0','C:0','T:0'],
+          ['A:0.6','G:0','C:0','T:0'],
+          ['A:0.5','G:0','C:0','T:0'],
+          ['A:0.4','G:0','C:0','T:0'],
+          ['A:0.3','G:0','C:0','T:0'],
+          ['A:0.2','G:0','C:0','T:0'],
+          ['A:0.1','G:0','C:0','T:0'],
+          ['A:0','G:1','C:0','T:0'],
+          ['A:0','G:0.9','C:0','T:0'],
+          ['A:0','G:0.8','C:0','T:0'],
+          ['A:0','G:0.7','C:0','T:0'],
+          ['A:0','G:0.6','C:0','T:0'],
+          ['A:0','G:0.5','C:0','T:0'],
+          ['A:0','G:0.4','C:0','T:0'],
+          ['A:0','G:0.3','C:0','T:0'],
+          ['A:0','G:0.2','C:0','T:0'],
+          ['A:0','G:0.1','C:0','T:0'],
+          ['A:0','G:0','C:0','T:0'],
+          ['A:0.9','G:0','C:0','T:0'],
+          ['A:0.8','G:0','C:0','T:0'],
+          ['A:0.7','G:0','C:0','T:0'],
+          ['A:0.6','G:0','C:0.6','T:0'],
+          ['A:0.5','G:0','C:0','T:0'],
+          ['A:0.4','G:0','C:0','T:0'],
+          ['A:0.3','G:0','C:0','T:0'],
+          ['A:0.2','G:0','C:0','T:0'],
+          ['A:0.1','G:0','C:0','T:0'],
+          ['A:0','G:0','C:0','T:0'],
+          ['A:0.9','G:0','C:0','T:0'],
+          ['A:0.8','G:0','C:0','T:0'],
+          ['A:0.7','G:0','C:0','T:0'],
+          ['A:0.6','G:0','C:0','T:0'],
+          ['A:0.5','G:0','C:0','T:0'],
+          ['A:0.4','G:0','C:0','T:0'],
+          ['A:0.3','G:0','C:0','T:0'],
+          ['A:0.2','G:0','C:0','T:0'],
+          ['A:0.1','G:0','C:0','T:0'],
+          ['A:0','G:0','C:0','T:0'],
+        ];
+        //var columns = [['A:0.25','G:0.25','C:0.25','T:0.25'], ['A:0.01','G:0.01','C:0.02','T:0.01']];
 
-        paper.seq_length = letters.length;
+        $(columns).each(function() {
+          var previous_height = 0;
+          $(this).each(function() {
+            var values = this.split(':', 2);
+            if (values[1] < 0.1) {
+              return;
+            }
+            var start = x + (column_width / 2);
 
-        $(letters).each(function() {
-          var nucleotide = paper.text(x + (column_width / 2), y, this).attr({fill: '#000', "font-family":"Arial", "font-size": "30px"});
-          nucleotide.scale(1,4);
-          var tick1 = paper.path("M" + x + "," + 285 + " V" + (285 + 5)).attr({fill:"#999", "stroke":"#999"});
-          var div   = paper.path("M" + x + "," + 255 + " V0").attr({fill:"#ddd", "stroke":"#ddd"});
-          var tick2 = paper.path("M" + x + "," + 270 + " V" + (270 + 5)).attr({fill:"#999", "stroke":"#999"});
-          var tick3 = paper.path("M" + x + "," + 255 + " V" + (255 + 5)).attr({fill:"#999", "stroke":"#999"});
-          var col_count = paper.text(x + (column_width / 2),  285 + 6, column_num).attr({fill: '#666', "font-family":"Arial", "font-size": "10px"});;
+            var y_pos = 269 - previous_height;
+
+
+            //var nucleotide = paper.path(x + (column_width / 2), y_pos, values[0]).attr({fill: colors[values[0]], "font-family":"Arial", "font-size": "250px"});
+            var x_pos = x + x_offsets[values[0]];
+            var nucleotide = paper.print(x_pos - 138, y_pos, values[0], paper.getFont("Arial Black", 900), 330, "baseline").attr({fill: colors[values[0]]});
+            var before_bbox = nucleotide.getBBox();
+
+            var scale_x = ((column_width * 100) / 250) / 100;
+            var scale_y = values[1];
+            nucleotide.transform("s" + scale_x + "," + scale_y);
+
+            var bbox = nucleotide.getBBox();
+            previous_height = previous_height + (bbox.height) + 1;
+            nucleotide.transform("t0," + (before_bbox.y2 - bbox.y2) + "...");
+          });
+
+          var tick1 = paper.path("M" + x + "," + 0 + " V" + (0 + 5)).attr({fill:"#999", "stroke":"#999"});
+          var col_count = paper.text(x + (column_width / 2),  0 + 6, column_num).attr({fill: '#666', "font-family":"Arial", "font-size": "10px"});
+
+          var div   = paper.path("M" + x + "," + 270 + " V0").attr({fill:"#ddd", "stroke":"#ddd"});
+          var tick2 = paper.path("M" + x + "," + 285 + " V" + (285 + 5)).attr({fill:"#999", "stroke":"#999"});
+          var tick3 = paper.path("M" + x + "," + 270 + " V" + (270 + 5)).attr({fill:"#999", "stroke":"#999"});
+          var odds = (Math.random() * 1).toFixed(2);
+          var odds_fill = '#ddd';
+          if (odds > 0.6) {
+            odds_fill = '#333';
+          }
+
+          var insert_odds = paper.text(x + (column_width / 2),  270 + 6, odds).attr({fill: odds_fill, "font-family":"Arial", "font-size": "10px"});
+          var insert_width = paper.text(x + (column_width / 2),  285 + 6, parseInt(Math.random() * 100) ).attr({fill: odds_fill, "font-family":"Arial", "font-size": "10px"});
           column_num++;
           x = x + column_width;
         });
 
 
+        paper.setViewBox(0,0, vis_width, vis_height );
 
 
 
@@ -71,14 +174,14 @@
         $('#left').bind('mousedown', function() {
           var x = paper._viewBox[0] - 400;
           if (x < 0) { x = 0 };
-          paper.setViewBox(x, 0, vis_width, vis_height, true);
+          paper.setViewBox(x, 0, vis_width, vis_height);
         });
 
         $('#right').bind('mousedown', function() {
           var x = paper._viewBox[0] + 400;
-          var max = (letters.length * 30);
+          var max = (columns.length * 30);
           if (x > max) { x = max };
-          paper.setViewBox(x, 0, vis_width, vis_height, true);
+          paper.setViewBox(x, 0, vis_width, vis_height);
         });
 
         $('#in').bind('click', function() {
