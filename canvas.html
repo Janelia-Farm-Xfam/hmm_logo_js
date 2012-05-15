@@ -4,8 +4,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script type="text/javascript" src="../raphael/raphael.js"></script>
-    <script type="text/javascript" src="Arial_Black_900.font.js"></script> 
     <title>HMM Logos</title>
     <style>
       .clearfix img {
@@ -18,14 +16,12 @@
       .clearfix {
         position:relative;
       }
-      div {
+      canvas {
         border: 1px solid #999;
         height: 300px;
       }
     </style>
     <script>
-
-      //var paper;
 
       $.fn.hmm_logo = function(data) {
         var column_width = 34;
@@ -41,15 +37,6 @@
           'T': '#b51f16',
           'U': '#b51f16'
         };
-        var x_offsets = {
-          A: 10,
-          C: 9,
-          G: 4,
-          T: 20
-        };
-
-
-        var domNode = $(this).get();
 
         var columns = [
           ['A:0.25','G:0.25','C:0.25','T:0.25'],
@@ -249,22 +236,30 @@
           ['A:0.1','G:0','C:0','T:0'],
           ['A:0','G:0','C:0','T:0']
         ];
-        //var columns = [['A:0.25','G:0.25','C:0.25','T:0.25'], ['A:0.01','G:0.01','C:0.02','T:0.01']];
         var image_width = columns.length * column_width;
 
-        paper = Raphael(domNode[0], vis_width, vis_height);
+        // create the canvas here.
+        $(this).append('<canvas id="canv" height="300" width="'+ image_width + '"></canvas>');
+
+        var canvas = $(this).find('#canv')[0];
+        var context = canvas.getContext("2d");
 
         for (var i = 0; i < 2; i++) {
-          var line = paper.path("M0," + y + " H" + image_width).attr({fill:"#999", "stroke":"#999"});
+          context.beginPath();
+          context.moveTo(0, y);
+          context.lineTo(image_width, y);
+          context.lineWidth = 1;
+          context.strokeStyle = "#999999";
+          context.stroke();
           y = y - 15;
         }
 
+
         y = y - 40;
+
 
         console.time('columns');
         var max_cols = columns.length;
-
-        var ticks = [];
 
         for( var i = 0; i < max_cols; i++ ) {
           var column = columns[i];
@@ -291,44 +286,34 @@
             nucleotide.transform("t0," + (before_bbox.y2 - bbox.y2) + "...");
           }); */
 
-          ticks.push({
-            type: "rect",
-            x: x,
-            y: 0,
-            width: 1,
-            height: 5,
-            fill: "#999",
-            stroke: "#fff",
-            'stroke-opacity': 0
-          });
-          ticks.push({
-            type: "rect",
-            x: x,
-            y: 285,
-            width: 1,
-            height: 5,
-            fill: "#999",
-            stroke: "#fff",
-            'stroke-opacity': 0
-          });
-          ticks.push({
-            type: "rect",
-            x: x,
-            y: 270,
-            width: 1,
-            height: 5,
-            fill: "#999",
-            stroke: "#fff",
-            'stroke-opacity': 0
-          });
-         /* 
-          var tick1 = paper.path("M" + x + "," + 0 + " V" + (0 + 5));
-          var tick2 = paper.path("M" + x + "," + 285 + " V" + (285 + 5));
-          var tick3 = paper.path("M" + x + "," + 270 + " V" + (270 + 5));
+          context.beginPath();
+          context.moveTo(x, 0);
+          context.lineTo(x, 5);
+          context.strokeStyle = "#999";
+          context.stroke();
 
-          var col_count = paper.text(x + (column_width / 2),  0 + 6, column_num).attr({fill: '#666', "font-family":"Arial", "font-size": "10px"});
+          context.beginPath();
+          context.moveTo(x, 285);
+          context.lineTo(x, 290);
+          context.strokeStyle = "#999";
+          context.stroke();
 
-          var div   = paper.path("M" + x + "," + 270 + " V0").attr({fill:"#ddd", "stroke":"#ddd"});
+          context.beginPath();
+          context.moveTo(x, 270);
+          context.lineTo(x, 275);
+          context.strokeStyle = "#999";
+          context.stroke();
+
+          context.beginPath();
+          context.moveTo(x, 270);
+          context.lineTo(x, 0);
+          context.strokeStyle = "#ddd";
+          context.stroke();
+
+          context.font = "10px Arial";
+          context.textAlign = "center";
+          context.fillStyle = "#666";
+          context.fillText(column_num, x + (column_width / 2), 10);
 
           var odds = (Math.random() * 1).toFixed(2);
           var odds_fill = '#ddd';
@@ -336,17 +321,26 @@
             odds_fill = '#333';
           }
 
-          var insert_odds = paper.text(x + (column_width / 2),  270 + 6, odds).attr({fill: odds_fill, "font-family":"Arial", "font-size": "10px"}); 
-          var insert_width = paper.text(x + (column_width / 2),  285 + 6, parseInt(Math.random() * 100) ).attr({fill: odds_fill, "font-family":"Arial", "font-size": "10px"});*/
+          context.font = "10px Arial";
+          context.textAlign = "center";
+          context.fillStyle = "#666";
+          context.fillText(odds, x + (column_width / 2), 270 + 10);
+
+          context.font = "10px Arial";
+          context.textAlign = "center";
+          context.fillStyle = "#666";
+          context.fillText(parseInt(Math.random() * 100), x + (column_width / 2), 285 + 10);
+
+
           column_num++;
           x = x + column_width;
         }
 
-        paper.add(ticks);
-
         console.timeEnd('columns');
 
+        return;
 
+        /*  
         var max = image_width - vis_width;
         var sliding = false;
         var slide_x = 0;
@@ -387,39 +381,7 @@
             sliding = false;
             slide_x = 0;
           });
-
-
-        paper.setViewBox(0,0, vis_width, vis_height );
-
-
-
-        //scroll the canvas left or right by 400px
-        $('#left').bind('mousedown', function() {
-          var x = paper._viewBox[0] - 400;
-          if (x < 0) { x = 0 };
-          paper.setViewBox(x, 0, vis_width, vis_height);
-        });
-
-        $('#right').bind('mousedown', function() {
-          var x = paper._viewBox[0] + 400;
-          var max = image_width - vis_width;
-          if (x > max) { x = max };
-          paper.setViewBox(x, 0, vis_width, vis_height);
-        });
-
-        $('#in').bind('click', function() {
-          console.info("this doesn't work yet");
-          return;
-          var x = paper._viewBox[0];
-          paper.setViewBox(x, 0, vis_width + 100, vis_height, true);
-        });
-
-        $('#out').bind('click', function() {
-          console.info("this doesn't work yet");
-          return;
-          var x = paper._viewBox[0];
-          paper.setViewBox(x, 0, vis_width - 100, vis_height, true);
-        });
+        */
 
       }
 
@@ -430,8 +392,6 @@
     </script>
   </head>
   <body>
-    <div id="graphic">
-    </div>
-    <a id="left">left</a> <a id="right">right</a> <a id="in">in</a> <a id="out">out</a>
+    <div id="graphic"></div>
   </body>
 </html>
