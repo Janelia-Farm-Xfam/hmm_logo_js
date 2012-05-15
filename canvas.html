@@ -23,10 +23,11 @@
     </style>
     <script>
 
+      var context = null;
+
       $.fn.hmm_logo = function(data) {
         var column_width = 34;
         var vis_width   = $(this).width();
-        var vis_height  = 300;
         var x = 0;
         var y = 285;
         var column_num = 1;
@@ -236,13 +237,19 @@
           ['A:0.1','G:0','C:0','T:0'],
           ['A:0','G:0','C:0','T:0']
         ];
+        /*var columns = [
+          ['A:0.25','G:0.25','C:0.25','T:0.25'],
+          ['A:1','G:0','C:0','T:0'],
+          ['A:0.25','G:0','C:0','T:0'],
+          ['A:1','G:0','C:0','T:0']
+        ];*/
         var image_width = columns.length * column_width;
 
         // create the canvas here.
         $(this).append('<canvas id="canv" height="300" width="'+ image_width + '"></canvas>');
 
         var canvas = $(this).find('#canv')[0];
-        var context = canvas.getContext("2d");
+        context = canvas.getContext("2d");
 
         for (var i = 0; i < 2; i++) {
           context.beginPath();
@@ -261,60 +268,70 @@
         console.time('columns');
         var max_cols = columns.length;
 
-        for( var i = 0; i < max_cols; i++ ) {
+        // loop for each column
+        for ( var i = 0; i < max_cols; i++ ) {
           var column = columns[i];
           var previous_height = 0;
-          /* $(this).each(function() {
-            var values = this.split(':', 2);
-            if (values[1] < 0.1) {
-              return;
+          var letters = column.length;
+          // draw each value in the column
+          for ( var j = 0; j < letters; j++ ) {
+            var letter = column[j];
+            var values = letter.split(':', 2);
+            if (values[1] > 0.1) {
+              var start = x + (column_width / 2);
+
+              var y_pos = 269 - previous_height;
+
+              var x_pos = x + (column_width / 2);
+
+              var glyph_height = 252 * values[1];
+
+              context.font = "bold 350px Arial";
+              context.textAlign = "center";
+              context.fillStyle = colors[values[0]];
+              context.transform (0.12, 0, 0, values[1], x_pos, y_pos);
+              context.fillText(values[0], 0, 0);
+              context.setTransform (1, 0, 0, 1, 0, 0);
+              previous_height = previous_height + glyph_height;
+
             }
-            var start = x + (column_width / 2);
+          }
 
-            var y_pos = 269 - previous_height;
-
-            var x_pos = x + x_offsets[values[0]];
-            var nucleotide = paper.print(x_pos - 138, y_pos, values[0], paper.getFont("Arial Black", 900), 330, "baseline").attr({fill: colors[values[0]]});
-            var before_bbox = nucleotide.getBBox();
-
-            var scale_x = ((column_width * 100) / 250) / 100;
-            var scale_y = values[1];
-            nucleotide.transform("s" + scale_x + "," + scale_y);
-
-            var bbox = nucleotide.getBBox();
-            previous_height = previous_height + (bbox.height) + 1;
-            nucleotide.transform("t0," + (before_bbox.y2 - bbox.y2) + "...");
-          }); */
-
+          // draw top ticks
           context.beginPath();
           context.moveTo(x, 0);
           context.lineTo(x, 5);
           context.strokeStyle = "#999";
           context.stroke();
 
+          // draw insert probability ticks
           context.beginPath();
           context.moveTo(x, 285);
           context.lineTo(x, 290);
           context.strokeStyle = "#999";
           context.stroke();
 
+          // draw insert length ticks
           context.beginPath();
           context.moveTo(x, 270);
           context.lineTo(x, 275);
           context.strokeStyle = "#999";
           context.stroke();
 
+          // draw column divider lines
           context.beginPath();
           context.moveTo(x, 270);
           context.lineTo(x, 0);
           context.strokeStyle = "#ddd";
           context.stroke();
 
+          // draw column numbers
           context.font = "10px Arial";
           context.textAlign = "center";
           context.fillStyle = "#666";
           context.fillText(column_num, x + (column_width / 2), 10);
 
+          //draw insert odds
           var odds = (Math.random() * 1).toFixed(2);
           var odds_fill = '#ddd';
           if (odds > 0.6) {
@@ -323,22 +340,21 @@
 
           context.font = "10px Arial";
           context.textAlign = "center";
-          context.fillStyle = "#666";
+          context.fillStyle = odds_fill;
           context.fillText(odds, x + (column_width / 2), 270 + 10);
 
+          // draw insert length
           context.font = "10px Arial";
           context.textAlign = "center";
           context.fillStyle = "#666";
           context.fillText(parseInt(Math.random() * 100), x + (column_width / 2), 285 + 10);
 
-
+          // increment for the next column
           column_num++;
           x = x + column_width;
         }
 
         console.timeEnd('columns');
-
-        return;
 
         /*  
         var max = image_width - vis_width;
