@@ -4,6 +4,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="../zynga-scroller-23ee166/src/Raf.js"></script>
+    <script src="../zynga-scroller-23ee166/src/Animate.js"></script>
+    <script src="../zynga-scroller-23ee166/src/Scroller.js"></script>
+    <script src="../zynga-scroller-23ee166/src/EasyScroller.js"></script>
     <!--[if lt IE 9]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
     <title>HMM Logos</title>
     <style>
@@ -24,8 +28,11 @@
         position:relative;
         border:1px solid #999;
         height: 300px;
-        width: 50000px;
+        width: 80%;
         overflow:hidden;
+      }
+      #graphic {
+        position:absolute;
       }
 
     </style>
@@ -85,7 +92,7 @@
           this.zoomed_column = this.column_width * zoom;
           this.total_width = this.zoomed_column * ((end - start) + 1);
 
-          $('#container').attr({'width':this.total_width + 'px'}).css({width:this.total_width + 'px'});
+          $('#graphic').attr({'width':this.total_width + 'px'}).css({width:this.total_width + 'px'});
 
           var canvas_count = Math.ceil(this.total_width / this.canvas_width);
           this.columns_per_canvas = Math.ceil(this.canvas_width / this.zoomed_column);
@@ -2403,14 +2410,45 @@
           ['A:0.8','G:0','C:0','T:0']
         ];
 
-        var zoom = 1;
+        var zoom         = 1;
+        var column_width = 34;
 
-        logo = new HMMLogo({column_width: 34, data: data, dom_element: '#graphic' });
-        logo.render();
+        logo = new HMMLogo({column_width: column_width, data: data, dom_element: '#graphic' });
+        logo.render({zoom:zoom});
+
+        var elements = document.querySelectorAll('[data-scrollable],[data-zoomable]'), element;
+        for (var i = 0; i < elements.length; i++) {
+
+          var element = elements[i];
+          scrollme = new EasyScroller(element, {
+            scrollingX: 1,
+            scrollingY: 0,
+          });
+
+        };
 
         $('#zoom').bind('change', function() {
+          //work my current position
+          var current_left = scrollme.scroller.getValues().left;
+          var current_col_width = (column_width * zoom);
+          var current_col_count = current_left / current_col_width;
+
           zoom = this.value;
           logo.render({zoom: zoom});
+
+          scrollme.reflow();
+
+          //scroll to previous position
+          var new_left = current_col_count * (column_width * zoom);
+          console.log(new_left);
+          scrollme.scroller.scrollTo(new_left, 0);
+
+        });
+
+        $('#position').bind('change', function() {
+          var new_column = this.value - 1;
+          var new_left = new_column  * (column_width * zoom);
+          scrollme.scroller.scrollTo(new_left, 0, 1);
         });
 
         $(document).keydown(function(e) {
@@ -2429,16 +2467,18 @@
         });
 
 
+
       });
     </script>
   </head>
   <body>
     <div id="container">
-      <div id="graphic" data-scrollable="x" data-zoomable="0.1-1">
+      <div id="graphic" data-scrollable="x">
         <!--[if lt IE 9]><canvas id="canv" height="300" width="20000"></canvas><![endif]-->
       </div>
     </div>
     <input type="text" name="zoom" id="zoom"/>
+    <input type="text" name="position" id="position"/>
 
   </body>
 </html>
