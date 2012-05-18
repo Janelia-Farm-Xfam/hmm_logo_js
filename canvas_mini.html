@@ -35,6 +35,16 @@
         position:absolute;
       }
 
+      #divider {
+        background: rgba(256,0,0,0.3);
+        position:absolute;
+        top:0;
+        height:300px;
+        width:1px;
+        left:50%;
+        z-index: 5;
+      }
+
     </style>
     <script>
 
@@ -2416,6 +2426,8 @@
         logo = new HMMLogo({column_width: column_width, data: data, dom_element: '#graphic' });
         logo.render({zoom:zoom});
 
+        scrollme = null;
+
         var elements = document.querySelectorAll('[data-scrollable],[data-zoomable]'), element;
         for (var i = 0; i < elements.length; i++) {
 
@@ -2429,26 +2441,37 @@
 
         $('#zoom').bind('change', function() {
           //work my current position
-          var current_left = scrollme.scroller.getValues().left;
-          var current_col_width = (column_width * zoom);
-          var current_col_count = current_left / current_col_width;
+          var before_left = scrollme.scroller.getValues().left;
+
+          var col_width = (column_width * zoom);
+          var col_count = before_left / col_width;
+          var half_visible_columns = ($('#container').width() / col_width) / 2;
+          var col_total = Math.ceil(col_count + half_visible_columns);
 
           zoom = this.value;
           logo.render({zoom: zoom});
-
           scrollme.reflow();
 
           //scroll to previous position
-          var new_left = current_col_count * (column_width * zoom);
-          console.log(new_left);
-          scrollme.scroller.scrollTo(new_left, 0);
+          scrollToColumn(col_total);
 
         });
 
-        $('#position').bind('change', function() {
-          var new_column = this.value - 1;
+
+        scrollToColumn = function(num, animate) {
+          var half_view = ($('#container').width() / 2) - ((column_width * zoom) / 2);
+          var new_column = num - 1;
           var new_left = new_column  * (column_width * zoom);
-          scrollme.scroller.scrollTo(new_left, 0, 1);
+
+          scrollme.scroller.scrollTo(new_left - half_view, 0, animate);
+        }
+
+        $('#position').bind('change', function() {
+          scrollToColumn(this.value, 1);
+        });
+
+        $('#pix_pos').bind('change', function() {
+          scrollme.scroller.scrollTo(this.value, 0, 1);
         });
 
         $(document).keydown(function(e) {
@@ -2466,8 +2489,6 @@
           }
         });
 
-
-
       });
     </script>
   </head>
@@ -2476,9 +2497,11 @@
       <div id="graphic" data-scrollable="x">
         <!--[if lt IE 9]><canvas id="canv" height="300" width="20000"></canvas><![endif]-->
       </div>
+      <div id="divider"></div>
     </div>
     <input type="text" name="zoom" id="zoom"/>
     <input type="text" name="position" id="position"/>
+    <input type="text" name="pix_pos" id="pix_pos"/>
 
   </body>
 </html>
