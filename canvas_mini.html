@@ -8,8 +8,7 @@
     <script src="../scroller/src/Animate.js"></script>
     <script src="../scroller/src/Scroller.js"></script>
     <script src="../scroller/src/EasyScroller.js"></script>
-    <!--[if lt IE 9]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
-    <title>HMM Logos</title>
+    <title>javascript HMM Logos</title>
     <style>
       .clearfix img {
         position:absolute;
@@ -71,7 +70,26 @@
         };
 
         this. aa_colors = {
-          'R': '#990000'
+          'A': '#FF9966',
+          'C': '#009999',
+          'D': '#FF0000',
+          'E': '#CC0033',
+          'F': '#00FF00',
+          'G': '#FFFF00',
+          'H': '#660033',
+          'I': '#CC9933',
+          'K': '#663300',
+          'L': '#FF9933',
+          'M': '#CC99CC',
+          'N': '#336666',
+          'P': '#0099FF',
+          'Q': '#6666CC',
+          'R': '#990000',
+          'S': '#0000FF',
+          'T': '#00FFFF',
+          'V': '#FFCC33',
+          'W': '#66CC66',
+          'Y': '#006600'
         };
 
         this.canvas_width = 5000;
@@ -2428,13 +2446,12 @@
 
         scrollme = null;
 
-        var elements = document.querySelectorAll('[data-scrollable],[data-zoomable]'), element;
+        var elements = $('#graphic');
         for (var i = 0; i < elements.length; i++) {
-
           var element = elements[i];
           scrollme = new EasyScroller(element, {
             scrollingX: 1,
-            scrollingY: 0,
+            scrollingY: 0
           });
 
         };
@@ -2494,7 +2511,7 @@
   </head>
   <body>
     <div id="container">
-      <div id="graphic" data-scrollable="x">
+      <div id="graphic">
         <!--[if lt IE 9]><canvas id="canv" height="300" width="20000"></canvas><![endif]-->
       </div>
       <div id="divider"></div>
@@ -2503,5 +2520,6 @@
     <input type="text" name="position" id="position"/>
     <input type="text" name="pix_pos" id="pix_pos"/>
 
+    <!--[if lt IE 9]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
   </body>
 </html>
