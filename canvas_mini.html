@@ -258,7 +258,7 @@
             draw_ticks(this.contexts[context_num], x, 0, 5);
 
             // draw insert probabilities/lengths
-            draw_small_insert(this.contexts[context_num], x, this.height - 12, this.zoomed_column, '', '');
+            draw_small_insert(this.contexts[context_num], x, this.height - 12, this.zoomed_column, this.data.insert_probs[i - 1] / 100, this.data.insert_lengths[i - 1]);
 
             x += this.zoomed_column;
           }
@@ -266,19 +266,35 @@
         }
 
         function draw_small_insert(context, x, y, col_width, odds, length) {
-          //TODO: get the real values for this from JSON when it is ready
-          odds   = (Math.random() * 1).toFixed(2);
-          length = parseInt(Math.random() * 100);
-          if (odds > 0.6) {
-            context.fillStyle = "#990000";
-            context.fillRect (x, y , col_width, 5);
+          var fill = "#ffffff";
+          if (odds > 0.4) {
+            fill = '#d7301f';
           }
+          else if ( odds > 0.3) {
+            fill = '#fc8d59';
+          }
+          else if ( odds > 0.2) {
+            fill = '#fdcc8a';
+          }
+          else if ( odds > 0.1) {
+            fill = '#fef0d9';
+          }
+          context.fillStyle = fill;
+          context.fillRect (x, y , col_width, 5);
 
+          fill = "#ffffff";
           // draw insert length
-          if (length > 80) {
-            context.fillStyle = "#666666";
-            context.fillRect (x, y + 7 , col_width, 5);
+          if (length > 99) {
+            fill = '#2171b5';
           }
+          else if ( length > 49) {
+            fill = '#6baed6';
+          }
+          else if ( length > 9) {
+            fill = '#bdd7e7';
+          }
+          context.fillStyle = fill;
+          context.fillRect (x, y + 7 , col_width, 5);
         }
 
         function draw_border(context, y, width) {
