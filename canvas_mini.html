@@ -60,6 +60,7 @@
         this.column_width = options.column_width || 34;
         this.height = options.height || 300;
         this.data = options.data || null;
+        this.alphabet = options.alphabet || 'dna';
         this.dom_element = options.dom_element || $('body');
 
         this.dna_colors = {
@@ -70,7 +71,7 @@
           'U': '#b51f16'
         };
 
-        this. aa_colors = {
+        this.aa_colors = {
           'A': '#FF9966',
           'C': '#009999',
           'D': '#FF0000',
@@ -92,6 +93,13 @@
           'W': '#66CC66',
           'Y': '#006600'
         };
+
+        // set the color library to use.
+        this.colors = this.dna_colors;
+
+        if (this.alphabet === 'aa') {
+          this.colors = this.aa_colors;
+        }
 
         this.canvas_width = 5000;
 
@@ -187,7 +195,7 @@
 
                 this.contexts[context_num].font = "bold 350px Arial";
                 this.contexts[context_num].textAlign = "center";
-                this.contexts[context_num].fillStyle = this.aa_colors[values[0]];
+                this.contexts[context_num].fillStyle = this.colors[values[0]];
                 // fonts are scaled to fit into the column width
                 // formula is y = 0.0024 * col_width + 0.0405
                 x_scale = ((0.0024 * this.zoomed_column) + 0.0405).toFixed(2);
@@ -237,7 +245,7 @@
                 var glyph_height = 277 * letter_height;
                 var y_pos = 285 - previous_height - glyph_height;
 
-                this.contexts[context_num].fillStyle = this.aa_colors[values[0]];
+                this.contexts[context_num].fillStyle = this.colors[values[0]];
                 this.contexts[context_num].fillRect (x_pos, y_pos, this.zoomed_column, glyph_height);
 
                 previous_height = previous_height + glyph_height;
@@ -580,7 +588,7 @@
         var zoom         = 1;
         var column_width = 34;
 
-        logo = new HMMLogo({column_width: column_width, data: data, dom_element: '#graphic'});
+        logo = new HMMLogo({column_width: column_width, data: data, dom_element: '#graphic', alphabet: 'dna'});
         logo.render({zoom:zoom});
 
         scrollme = null;
