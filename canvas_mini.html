@@ -80,7 +80,7 @@
           'D': '#FF0000',
           'E': '#CC0033',
           'F': '#00FF00',
-          'G': '#FFFF00',
+          'G': '#f2f20c',
           'H': '#660033',
           'I': '#CC9933',
           'K': '#663300',
@@ -114,7 +114,6 @@
 
         this.render = function(options) {
           if (!this.data) {
-            console.log('not going to render anything as there is no data to render');
             return;
           }
           options = (options) ? options : {};
@@ -143,15 +142,17 @@
           start     = (start > end) ? end : start;
           start     = (start > 1) ? start : 1;
 
+
           this.y = this.height - 20;
 
           this.zoomed_column = this.column_width * zoom;
           this.total_width = this.zoomed_column * ((end - start) + 1);
 
-          $('#graphic').attr({'width':this.total_width + 'px'}).css({width:this.total_width + 'px'});
+          $(this.dom_element).attr({'width':this.total_width + 'px'}).css({width:this.total_width + 'px'});
 
           var canvas_count = Math.ceil(this.total_width / this.canvas_width);
           this.columns_per_canvas = Math.ceil(this.canvas_width / this.zoomed_column);
+
 
 
           $(this.dom_element).find('canvas').remove();
@@ -160,38 +161,14 @@
           this.contexts = [];
 
 
-          if ((end - start + 1) < this.columns_per_canvas) {
-            var adjusted_width = ((end - start) + 1) * this.zoomed_column;
 
-            this.canvases[i] = attach_canvas(this.dom_element, this.height, adjusted_width, i);
-            this.contexts[i] = this.canvases[i].getContext('2d');
-            this.contexts[i].setTransform(1, 0, 0, 1, 0, 0);
-            this.contexts[i].clearRect(0, 0, adjusted_width, this.height);
-
-
-
-            if (this.zoomed_column > 12) {
-              var fontsize = parseInt(10 * zoom);
-              fontsize = (fontsize > 10) ? 10 : fontsize;
-              this.render_with_text(start, end, i, fontsize);
-            }
-            else {
-              this.render_with_rects(start, end, i);
-            }
-          }
-          else {
             for (var i = 0; i < canvas_count; i++) {
-              var split_end   = (1 + i) * this.columns_per_canvas;
-              var split_start = (split_end - this.columns_per_canvas) + 1;
 
-              if (split_end > end ) {
+              var split_start = (this.columns_per_canvas * i) + start;
+              var split_end   = split_start + this.columns_per_canvas - 1;
+              if (split_end > end) {
                 split_end = end;
               }
-
-              if(split_start < start) {
-                split_start = start;
-              }
-
 
               var adjusted_width = ((split_end - split_start) + 1) * this.zoomed_column;
 
@@ -211,7 +188,6 @@
                 this.render_with_rects(split_start, split_end, i);
               }
             }
-          }
           this.scrollme.reflow();
         }
 
@@ -472,7 +448,7 @@
       "max_height":3.45311498641967773,
       "height_arr":[
         ["A:0.25","C:0.25","D:0.25","E:0.25","F:0.25","G:0.25","H:0.25","I:0.25","K:0.25","L:0.25","M:0.25"],
-        ["N:0.25","P:0.25","Q:0.25","R:0.25","S:0.25","T:0.25","V:0.25","W:0.25","X:0.25"],
+        ["N:0.25","P:0.25","Q:0.25","R:0.25","S:0.25","T:0.25","V:0.25","W:0.25","Y:0.25"],
         ["W:0.001","H:0.003","N:0.004","E:0.005","R:0.005","K:0.006","S:0.007","Y:0.007","P:0.007","D:0.007","M:0.009","C:0.01","A:0.01","F:0.011","Q:0.011","V:0.013","G:0.013","I:0.015","T:0.019","L:0.026"],
         ["W:0.004","D:0.004","H:0.005","N:0.006","P:0.006","E:0.007","G:0.007","K:0.008","Q:0.008","C:0.008","R:0.008","Y:0.012","S:0.014","T:0.023","A:0.029","M:0.037","F:0.188","V:0.196","L:0.297","I:0.388"],
         ["W:0.004","D:0.004","H:0.006","P:0.007","N:0.008","E:0.008","Q:0.009","C:0.009","G:0.009","K:0.01","R:0.01","Y:0.013","S:0.018","T:0.026","F:0.038","A:0.062","M:0.073","I:0.123","L:0.188","V:0.231"],
@@ -785,8 +761,6 @@
         var column_width = 34;
 
         logo = new HMMLogo({column_width: column_width, data: data, dom_element: '#graphic', alphabet: 'aa'});
-        //logo.render({zoom:zoom, start: 120, end: 200 });
-        //logo.render({zoom:zoom, start: 29, end: 200 });
         logo.render({zoom:zoom});
 
 
