@@ -243,7 +243,7 @@
       var col_total = Math.ceil(col_count + half_visible_columns);
 
       this.zoom = zoom_level;
-      logo.render({zoom: this.zoom});
+      this.render({zoom: this.zoom});
       this.scrollme.reflow();
 
       //scroll to previous position
@@ -252,8 +252,11 @@
 
     this.scrollToColumn = function(num, animate) {
       var half_view = ($('#container').width() / 2) - ((this.column_width * this.zoom) / 2);
+      console.log(half_view);
       var new_column = num - 1;
+      console.log(new_column);
       var new_left = new_column  * (this.column_width * this.zoom);
+      console.log(new_left);
 
       this.scrollme.scroller.scrollTo(new_left - half_view, 0, animate);
     }
@@ -392,12 +395,14 @@
     logo.render(options);
 
     $('#zoom').bind('change', function() {
-      logo.change_zoom(this.value);
+      var hmm_logo = logo;
+      hmm_logo.change_zoom(this.value);
     });
 
 
     $('#position').bind('change', function() {
-      logo.scrollToColumn(this.value, 1);
+      var hmm_logo = logo;
+      hmm_logo.scrollToColumn(this.value, 1);
     });
 
     $(document).keydown(function(e) {
