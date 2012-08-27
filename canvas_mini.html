@@ -5,6 +5,7 @@
   <head>
     <meta charset="utf-8">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="../../dfam/Server/root/static/js/libs/modernizr-2.0.6.min.js"></script>
     <script src="../scroller/src/Raf.js"></script>
     <script src="../scroller/src/Animate.js"></script>
     <script src="../scroller/src/Scroller.js"></script>
@@ -22,30 +23,80 @@
       .clearfix {
         position:relative;
       }
-    /*  canvas {
-        height: 300px;
-      }*/
-      #container {
-        position:relative;
-        border:1px solid #999;
-        height: 300px;
-        width: 95%;
-        margin:auto;
-        overflow:hidden;
-      }
-      #graphic {
-        position:absolute;
-      }
 
-      #divider {
-        background: rgba(256,0,0,0.1);
-        position:absolute;
-        top:0;
-        height:300px;
-        width:1px;
-        left:50%;
-        z-index: 5;
-      }
+#logo {
+  position:relative;
+  margin:auto;
+  width:95%;
+}
+
+#logo form {
+  margin: 0.3em 40px;
+  button {
+    margin-bottom:0.3em;
+  }
+  input {
+    margin: 0 0.3em;
+    width: 3em;
+  }
+}
+
+#logo_container {
+  position:relative;
+  height: 300px;
+  overflow:hidden;
+  margin-left:40px;
+  border:1px solid #999;
+}
+
+#logo_graphic {
+  position:absolute;
+  height:300px;
+  background-color: #E4F0C4;
+  background-image: -webkit-gradient(linear, 0 100%, 100% 0,
+  color-stop(.25, rgba(255, 255, 255, .2)), color-stop(.25, transparent),
+  color-stop(.5, transparent), color-stop(.5, rgba(255, 255, 255, .2)),
+  color-stop(.75, rgba(255, 255, 255, .2)), color-stop(.75, transparent),
+  to(transparent));
+  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, .2) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%,
+    transparent 75%, transparent);
+  background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, .2) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%,
+    transparent 75%, transparent);
+  background-image: -ms-linear-gradient(45deg, rgba(255, 255, 255, .2) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%,
+    transparent 75%, transparent);
+  background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, .2) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%,
+    transparent 75%, transparent);
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, .2) 25%, transparent 25%,
+    transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%,
+    transparent 75%, transparent);
+  -webkit-background-size: 50px 50px;
+  -moz-background-size: 50px 50px;
+  background-size: 50px 50px;
+}
+
+#logo_yaxis {
+  position:absolute;
+}
+
+.canvas_logo {
+  position:absolute;
+  top:0;
+}
+
+#divider {
+  background: rgba(256,0,0,0.1);
+  position:absolute;
+  top:0;
+  height:300px;
+  width:1px;
+  left:50%;
+  z-index: 5;
+}
+
 
     </style>
     <script>
@@ -55,21 +106,22 @@
 
         var zoom         = 1;
         var column_width = 34;
-        $('#graphic').hmm_logo({column_width: column_width, data: logo_data, alphabet: 'dna'});
+        $('#logo_graphic').hmm_logo({column_width: 34, data: logo_data, alphabet: 'dna'});
+
       });
     </script>
   </head>
   <body>
-    <div id="container">
-      <div id="graphic">
-        <!--[if lt IE 9]><canvas id="canv" height="300" width="20000"></canvas><![endif]-->
+    <div class="logo">
+    <div id="logo">
+      <div id="logo_container">
+        <div id="logo_graphic">
+          <!--[if lt IE 9]><canvas id="canv" height="300" width="20000"></canvas><![endif]-->
+        </div>
+        <div id="divider"></div>
       </div>
-      <div id="divider"></div>
     </div>
-    <label for="zoom">Zoom</label>
-    <input type="text" name="zoom" id="zoom"/>
-    <label for="position">Column number</label>
-    <input type="text" name="position" id="position"/>
+  </div>
 
     <!--[if lt IE 9]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
   </body>

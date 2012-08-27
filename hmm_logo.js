@@ -56,18 +56,32 @@
 
     this.canvas_width = 5000;
 
-    this.scrollme = new EasyScroller($(this.dom_element)[0], {
-      scrollingX: 1,
-      scrollingY: 0
-    });
+    if (Modernizr.canvas) {
+      this.scrollme = new EasyScroller($(this.dom_element)[0], {
+        scrollingX: 1,
+        scrollingY: 0
+      });
+    }
 
+    this.previous_target = 0;
+    this.rendered = [];
+    this.previous_zoom = 0;
 
     this.render = function(options) {
       if (!this.data) {
         return;
       }
-      options = (options) ? options : {};
-      var zoom  = options.zoom || this.zoom;
+      options    = (options) ? options : {};
+      var zoom   = options.zoom || this.zoom;
+      var target = options.target || 1;
+
+      if (target === this.previous_target) {
+        return;
+      }
+
+      this.previous_target = target;
+
+
       if ( options.start ) {
         this.start = options.start;
       }
@@ -95,8 +109,13 @@
 
       this.y = this.height - 20;
 
+
       this.zoomed_column = this.column_width * zoom;
       this.total_width = this.zoomed_column * ((end - start) + 1);
+
+      if (target > this.total_width) {
+        target = this.total_width;
+      }
 
       $(this.dom_element).attr({'width':this.total_width + 'px'}).css({width:this.total_width + 'px'});
 
@@ -104,13 +123,16 @@
       this.columns_per_canvas = Math.ceil(this.canvas_width / this.zoomed_column);
 
 
-
-      $(this.dom_element).find('canvas').remove();
+      if (this.previous_zoom !== this.zoom) {
+        $(this.dom_element).find('canvas').remove();
+        this.previous_zoom = this.zoom;
+        this.rendered = [];
+      }
 
       this.canvases = [];
       this.contexts = [];
 
-
+      var max_canvas_width = 1;
 
       for (var i = 0; i < canvas_count; i++) {
 
@@ -122,69 +144,146 @@
 
         var adjusted_width = ((split_end - split_start) + 1) * this.zoomed_column;
 
-        this.canvases[i] = attach_canvas(this.dom_element, this.height, adjusted_width, i);
-        this.contexts[i] = this.canvases[i].getContext('2d');
-        this.contexts[i].setTransform(1, 0, 0, 1, 0, 0);
-        this.contexts[i].clearRect(0, 0, adjusted_width, this.height);
-
-
-
-        if (this.zoomed_column > 12) {
-          var fontsize = parseInt(10 * zoom);
-          fontsize = (fontsize > 10) ? 10 : fontsize;
-          this.render_with_text(split_start, split_end, i, fontsize);
+        if (adjusted_width > max_canvas_width) {
+          max_canvas_width = adjusted_width;
         }
-        else {
-          this.render_with_rects(split_start, split_end, i);
+
+        var canv_start = max_canvas_width * i
+        var canv_end = canv_start + adjusted_width;
+
+        if (target < canv_end + (canv_end / 2) && target > canv_start - (canv_start / 2)) {
+          if (this.rendered[i] !== 1) {
+
+            this.canvases[i] = attach_canvas(this.dom_element, this.height, adjusted_width, i, max_canvas_width);
+            this.contexts[i] = this.canvases[i].getContext('2d');
+            this.contexts[i].setTransform(1, 0, 0, 1, 0, 0);
+            this.contexts[i].clearRect(0, 0, adjusted_width, this.height);
+            this.contexts[i].fillStyle = "#ffffff";
+            this.contexts[i].fillRect (0, 0, canv_end, this.height);
+
+
+            if (this.zoomed_column > 12) {
+              var fontsize = parseInt(10 * zoom);
+              fontsize = (fontsize > 10) ? 10 : fontsize;
+              this.render_with_text(split_start, split_end, i, fontsize);
+            }
+            else {
+              this.render_with_rects(split_start, split_end, i);
+            }
+            this.rendered[i] = 1;
+          }
         }
+
       }
-      this.scrollme.reflow();
+
+      if (target !== 1 && Modernizr.canvas) {
+        this.scrollme.reflow();
+      }
     }
+
+    this.render_y_axis = function () {
+      //attach a canvas for the y-axis
+      $(this.dom_element).parent().before('<p class="centered" style="margin-left:40px">Model Position</p><canvas id="logo_yaxis" class="logo_yaxis" height="300" width="40"></canvas>');
+      var canvas = $('#logo_yaxis');
+      if(!isCanvasSupported()) {
+        canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
+      }
+      var context = canvas[0].getContext('2d');
+      //draw tick marks
+      context.beginPath();
+      context.moveTo(40, 1);
+      context.lineTo(30, 1);
+      context.moveTo(40, 271);
+      context.lineTo(30, 271);
+      context.moveTo(40, (271 / 2));
+      context.lineTo(30, (271 / 2));
+      context.lineWidth = 1;
+      context.strokeStyle = "#666666";
+      context.stroke();
+      context.fillStyle = "#000000";
+      context.textAlign = "right";
+      context.font = "bold 10px Arial";
+      context.textBaseline = "top";
+      context.fillText('2', 28, 0);
+      context.textBaseline = "middle";
+      context.fillText('1', 28, (271/2));
+      context.fillText('0', 28, 271);
+      // draw the label
+      context.save();
+      context.translate(10, this.height / 2);
+      context.rotate(-Math.PI/2);
+      context.textAlign = "center";
+      context.font = "normal 12px Arial";
+      context.fillText("Information Content", 1, 0);
+      context.restore();
+    }
+    this.render_y_axis();
 
     this.render_with_text = function(start, end, context_num, fontsize) {
       var x = 0;
       var column_num = start;
       for ( var i = start; i <=  end; i++ ) {
-        var column = this.data.height_arr[i - 1];
-        var previous_height = 0;
-        var letters = column.length;
-        for ( var j = 0; j < letters; j++ ) {
-          var letter = column[j];
-          var values = letter.split(':', 2);
-          if (values[1] > 0.01) {
-            var letter_height = (1 * values[1]) / this.data.max_height;
-            var x_pos = x + (this.zoomed_column / 2);
-            var y_pos = 269 - previous_height;
-            var glyph_height = 258 * letter_height;
+        if (this.data.mmline && this.data.mmline[i - 1] === 1) {
+          this.contexts[context_num].fillStyle = '#cccccc';
+          this.contexts[context_num].fillRect (x, 10, this.zoomed_column, this.height - 40);
+        }
+        else {
+          var column = this.data.height_arr[i - 1];
+          var previous_height = 0;
+          var letters = column.length;
+          for ( var j = 0; j < letters; j++ ) {
+            var letter = column[j];
+            var values = letter.split(':', 2);
+            if (values[1] > 0.01) {
+              var letter_height = (1 * values[1]) / this.data.max_height;
+              var x_pos = x + (this.zoomed_column / 2);
+              var y_pos = 269 - previous_height;
+              var glyph_height = 258 * letter_height;
 
-            if(!isCanvasSupported()) {
-              y_pos = y_pos + (glyph_height * letter_height);
+              if(!isCanvasSupported()) {
+                y_pos = y_pos + (glyph_height * letter_height);
+              }
+
+              this.contexts[context_num].font = "bold 350px Arial";
+              this.contexts[context_num].textAlign = "center";
+              this.contexts[context_num].fillStyle = this.colors[values[0]];
+              // fonts are scaled to fit into the column width
+              // formula is y = 0.0024 * col_width + 0.0405
+              x_scale = ((0.0024 * this.zoomed_column) + 0.0405).toFixed(2);
+              this.contexts[context_num].transform (x_scale, 0, 0, letter_height, x_pos, y_pos);
+              this.contexts[context_num].fillText(values[0], 0, 0);
+              this.contexts[context_num].setTransform (1, 0, 0, 1, 0, 0);
+              previous_height = previous_height + glyph_height;
             }
-
-            this.contexts[context_num].font = "bold 350px Arial";
-            this.contexts[context_num].textAlign = "center";
-            this.contexts[context_num].fillStyle = this.colors[values[0]];
-            // fonts are scaled to fit into the column width
-            // formula is y = 0.0024 * col_width + 0.0405
-            x_scale = ((0.0024 * this.zoomed_column) + 0.0405).toFixed(2);
-            this.contexts[context_num].transform (x_scale, 0, 0, letter_height, x_pos, y_pos);
-            this.contexts[context_num].fillText(values[0], 0, 0);
-            this.contexts[context_num].setTransform (1, 0, 0, 1, 0, 0);
-            previous_height = previous_height + glyph_height;
           }
         }
 
-        // draw column dividers
-        draw_ticks(this.contexts[context_num], x, this.height - 30, 0 - this.height - 30, '#dddddd');
-        // draw top ticks
-        draw_ticks(this.contexts[context_num], x, 0, 5);
         //draw insert length ticks
         draw_ticks(this.contexts[context_num], x, this.height - 15, 5);
         // draw insert probability ticks
         draw_ticks(this.contexts[context_num], x, this.height - 30, 5);
 
-        // draw column numbers
-        draw_column_number(this.contexts[context_num], x, 10, this.zoomed_column, column_num, fontsize);
+        if (this.zoom < 0.7) {
+          if (i % 5 === 0) {
+            // draw column dividers
+            draw_ticks(this.contexts[context_num], x + this.zoomed_column, this.height - 30, 0 - this.height - 30, '#dddddd');
+            // draw top ticks
+            draw_ticks(this.contexts[context_num], x + this.zoomed_column, 0, 5);
+            // draw column numbers
+            draw_column_number(this.contexts[context_num], x + 2, 10, this.zoomed_column, column_num, 10, true);
+          }
+        }
+        else {
+          // draw column dividers
+          draw_ticks(this.contexts[context_num], x, this.height - 30, 0 - this.height - 30, '#dddddd');
+          // draw top ticks
+          draw_ticks(this.contexts[context_num], x, 0, 5);
+          // draw column numbers
+          draw_column_number(this.contexts[context_num], x, 10, this.zoomed_column, column_num, fontsize);
+        }
+
+
+
         draw_insert_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.insert_probs[i - 1] / 100, fontsize);
         draw_insert_length(this.contexts[context_num], x, this.height - 5, this.zoomed_column, this.data.insert_lengths[i - 1], fontsize);
 
@@ -200,35 +299,57 @@
 
     this.render_with_rects = function(start, end, context_num) {
       var x = 0;
+      var column_num = start;
       for ( var i = start; i <= end; i++ ) {
-        var column = this.data.height_arr[i - 1];
-        var previous_height = 0;
-        var letters = column.length;
-        for ( var j = 0; j < letters; j++ ) {
-          var letter = column[j];
-          var values = letter.split(':', 2);
-          if (values[1] > 0.01) {
-            var letter_height = (1 * values[1]) / this.data.max_height;
-            var x_pos = x;
-            var glyph_height = 277 * letter_height;
-            var y_pos = 285 - previous_height - glyph_height;
+        if (this.data.mmline && this.data.mmline[i - 1] === 1) {
+          this.contexts[context_num].fillStyle = '#cccccc';
+          this.contexts[context_num].fillRect (x, 10, this.zoomed_column, this.height - 40);
+        }
+        else {
+          var column = this.data.height_arr[i - 1];
+          var previous_height = 0;
+          var letters = column.length;
+          for ( var j = 0; j < letters; j++ ) {
+            var letter = column[j];
+            var values = letter.split(':', 2);
+            if (values[1] > 0.01) {
+              var letter_height = (1 * values[1]) / this.data.max_height;
+              var x_pos = x;
+              var glyph_height = 258 * letter_height;
+              var y_pos = 269 - previous_height - glyph_height;
 
-            this.contexts[context_num].fillStyle = this.colors[values[0]];
-            this.contexts[context_num].fillRect (x_pos, y_pos, this.zoomed_column, glyph_height);
+              this.contexts[context_num].fillStyle = this.colors[values[0]];
+              this.contexts[context_num].fillRect (x_pos, y_pos, this.zoomed_column, glyph_height);
 
-            previous_height = previous_height + glyph_height;
+              previous_height = previous_height + glyph_height;
+            }
           }
         }
 
-        // draw column dividers
-        draw_ticks(this.contexts[context_num], x, this.height - 15, 0 - this.height, '#dddddd');
-        // draw top ticks
-        draw_ticks(this.contexts[context_num], x, 0, 5);
+        var mod = 10;
+
+        if ( this.zoom < 0.2) {
+          mod = 20;
+        }
+        else if (this.zoom < 0.3) {
+          mod = 10;
+        }
+
+        if (i % mod === 0) {
+          // draw column dividers
+          draw_ticks(this.contexts[context_num], x + this.zoomed_column, this.height - 30, 0 - this.height, '#dddddd');
+          // draw top ticks
+          draw_ticks(this.contexts[context_num], x + this.zoomed_column, 0, 5);
+          // draw column numbers
+          draw_column_number(this.contexts[context_num], x - 2,  10, this.zoomed_column, column_num, 10, true);
+        }
+
 
         // draw insert probabilities/lengths
-        draw_small_insert(this.contexts[context_num], x, this.height - 12, this.zoomed_column, this.data.insert_probs[i - 1] / 100, this.data.insert_lengths[i - 1]);
+        draw_small_insert(this.contexts[context_num], x, this.height - 28, this.zoomed_column, this.data.insert_probs[i - 1] / 100, this.data.insert_lengths[i - 1]);
 
         x += this.zoomed_column;
+        column_num++;
       }
 
     }
@@ -239,7 +360,7 @@
 
       var col_width = (this.column_width * this.zoom);
       var col_count = before_left / col_width;
-      var half_visible_columns = ($('#container').width() / col_width) / 2;
+      var half_visible_columns = ($('#logo_container').width() / col_width) / 2;
       var col_total = Math.ceil(col_count + half_visible_columns);
 
       this.zoom = zoom_level;
@@ -251,12 +372,9 @@
     }
 
     this.scrollToColumn = function(num, animate) {
-      var half_view = ($('#container').width() / 2) - ((this.column_width * this.zoom) / 2);
-      console.log(half_view);
+      var half_view = ($('#logo_container').width() / 2) - ((this.column_width * this.zoom) / 2);
       var new_column = num - 1;
-      console.log(new_column);
       var new_left = new_column  * (this.column_width * this.zoom);
-      console.log(new_left);
 
       this.scrollme.scroller.scrollTo(new_left - half_view, 0, animate);
     }
@@ -276,7 +394,7 @@
         fill = '#fef0d9';
       }
       context.fillStyle = fill;
-      context.fillRect (x, y , col_width, 5);
+      context.fillRect (x, y , col_width, 10);
 
       fill = "#ffffff";
       // draw insert length
@@ -290,7 +408,7 @@
         fill = '#bdd7e7';
       }
       context.fillStyle = fill;
-      context.fillRect (x, y + 7 , col_width, 5);
+      context.fillRect (x, y + 12 , col_width, 10);
     }
 
     function draw_border(context, y, width) {
@@ -357,9 +475,14 @@
       context.fillText(text, x + (col_width / 2), y);
     }
 
-    function draw_column_number(context, x, y, col_width, col_num, fontsize) {
+    function draw_column_number(context, x, y, col_width, col_num, fontsize, right) {
       context.font = fontsize + "px Arial";
-      context.textAlign = "center";
+      if (right) {
+        context.textAlign = "right";
+      }
+      else {
+        context.textAlign = "center";
+      }
       context.fillStyle = "#666666";
       context.fillText(col_num, x + (col_width / 2), y);
     }
@@ -373,36 +496,108 @@
       context.stroke();
     }
 
+    function attach_canvas(DOMid, height, width, id, canv_width) {
+      var canvas = $(DOMid).find('#canv_' + id);
 
-    function attach_canvas(DOMid, height, width, id) {
-      if ($(DOMid).find('#canv_' + id).length){
-        var canvas = $(DOMid).find('#canv_' + id)[0];
-        $(canvas).attr('width', width)
-          .attr('height',height);
-        return canvas
+      if (!canvas.length) {
+        $(DOMid).append('<canvas class="canvas_logo" id="canv_' + id + '"  height="'+ height +'" width="'+ width + '" style="left:' + canv_width * id + 'px"></canvas>');
+        canvas = $(DOMid).find('#canv_' + id);
       }
-      $(DOMid).append('<canvas id="canv_' + id + '"  height="'+ height +'" width="'+ width + '"></canvas>');
-      return $(DOMid).find('#canv_' + id)[0];
+
+      $(canvas).attr('width', width).attr('height',height);
+
+      if(!isCanvasSupported()) {
+        canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
+      }
+
+      return canvas[0];
     }
+
   }
+
 
   $.fn.hmm_logo = function(options) {
     options = (options) ? options : {};
     options.dom_element = $(this);
-    var zoom = options.zoom;
+    var zoom = options.zoom || 1;
 
     var logo = new HMMLogo(options);
     logo.render(options);
 
-    $('#zoom').bind('change', function() {
-      var hmm_logo = logo;
-      hmm_logo.change_zoom(this.value);
-    });
+    if(Modernizr.canvas) {
+
+      $(this).parent().after('<form>' +
+        '<label for="zoom">Zoom level</label><button id="zoomout" class="button">-</button>' +
+        '<input type="hidden" id="zoom" name="zoom" value="'+ zoom + '"></input><button id="zoomin" class="button">+</button><button class="button" id="zoom_reset">Reset</button></form>' +
+        '<form><label for="position">Column number</label>' +
+        '<input type="text" name="position" id="position"></input>' +
+        '<button class="button" id="logo_change">Go</button>' +
+        '</form>');
+
+      $('#zoom_reset').bind('click', function(e) {
+        e.preventDefault();
+        var zoom = $('#zoom');
+        zoom[0].value = 1;
+        zoom.trigger('change');
+      });
+
+      $('#logo_change').bind('click', function(e) {
+        e.preventDefault();
+      });
+
+      $('#zoomin').bind('click', function (e) {
+        e.preventDefault();
+        var zoom = $('#zoom')
+        var current = parseFloat(zoom[0].value);
+        var next = (current + 0.1).toFixed(1);
+        if (next > 1) {
+          next = 1;
+        }
+        zoom[0].value = next;
+        zoom.trigger('change');
+      });
+
+      $('#zoomout').bind('click', function (e) {
+        e.preventDefault();
+        var zoom = $('#zoom')
+        var current = parseFloat(zoom[0].value);
+        var next = (current - 0.1).toFixed(1);
+        if (next < 0.1) {
+          next = 0.1;
+        }
+        zoom[0].value = next;
+        zoom.trigger('change');
+      });
+
+      $('#zoom').bind('change', function() {
+        var hmm_logo = logo;
+        if (!this.value.match(/^\d+\.?\d?$/m)) {
+          return;
+        }
+        hmm_logo.change_zoom(this.value);
+      });
 
 
-    $('#position').bind('change', function() {
+      $('#position').bind('change', function() {
+        var hmm_logo = logo;
+        if (!this.value.match(/^\d+$/m)) {
+          return;
+        }
+        hmm_logo.scrollToColumn(this.value, 1);
+      });
+
+    }
+
+    if(!Modernizr.canvas) {
+      $('#logo_container').bind('scroll', function () {
+        $(document).trigger("scrolledTo", [this.scrollLeft, 1, 1] );
+      });
+    }
+
+    $(document).bind("scrolledTo", function(e, left, top, zoom) {
+        console.log(left);
       var hmm_logo = logo;
-      hmm_logo.scrollToColumn(this.value, 1);
+      logo.render({target: left});
     });
 
     $(document).keydown(function(e) {
