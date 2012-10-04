@@ -10,11 +10,20 @@
     this.column_width = options.column_width || 34;
     this.height = options.height || 300;
     this.data = options.data || null;
+
     this.alphabet = options.alphabet || 'dna';
     this.dom_element = options.dom_element || $('body');
     this.start = options.start || 1;
     this.end = options.end || this.data.height_arr.length;
     this.zoom = options.zoom || 1;
+
+    if (options.scaled_max) {
+      this.data.max_height = options.data.max_height_obs;
+    }
+    else {
+      this.data.max_height = options.data.max_height_theory;
+    }
+
 
     this.dna_colors = {
       'A': '#cbf751',
@@ -204,9 +213,9 @@
       context.textAlign = "right";
       context.font = "bold 10px Arial";
       context.textBaseline = "top";
-      context.fillText('2', 28, 0);
+      context.fillText(this.data.max_height.toFixed(1), 28, 0);
       context.textBaseline = "middle";
-      context.fillText('1', 28, (271/2));
+      context.fillText(parseFloat(this.data.max_height / 2).toFixed(1), 28, (271/2));
       context.fillText('0', 28, 271);
       // draw the label
       context.save();
@@ -222,38 +231,49 @@
     this.render_with_text = function(start, end, context_num, fontsize) {
       var x = 0;
       var column_num = start;
-      for ( var i = start; i <=  end; i++ ) {
+      // add 3 extra columns so that numbers don't get clipped at the end of a canvas
+      // that ends before a large column. DF0000830 was suffering at zoom level 0.6,
+      // column 2215. This adds a little extra overhead, but is the easiest fix for now.
+      if (end + 3 <= this.end) {
+        end += 3;
+      }
+
+      for ( var i = start; i <= end; i++ ) {
         if (this.data.mmline && this.data.mmline[i - 1] === 1) {
           this.contexts[context_num].fillStyle = '#cccccc';
           this.contexts[context_num].fillRect (x, 10, this.zoomed_column, this.height - 40);
         }
         else {
           var column = this.data.height_arr[i - 1];
-          var previous_height = 0;
-          var letters = column.length;
-          for ( var j = 0; j < letters; j++ ) {
-            var letter = column[j];
-            var values = letter.split(':', 2);
-            if (values[1] > 0.01) {
-              var letter_height = (1 * values[1]) / this.data.max_height;
-              var x_pos = x + (this.zoomed_column / 2);
-              var y_pos = 269 - previous_height;
-              var glyph_height = 258 * letter_height;
+          if (column) {
+            var previous_height = 0;
+            var letters = column.length;
+            for ( var j = 0; j < letters; j++ ) {
+              var letter = column[j];
+              var values = letter.split(':', 2);
+              if (values[1] > 0.01) {
+                var letter_height = (1 * values[1]) / this.data.max_height;
+                var x_pos = x + (this.zoomed_column / 2);
+                var y_pos = 269 - previous_height;
+                var glyph_height = 258 * letter_height;
 
-              if(!isCanvasSupported()) {
-                y_pos = y_pos + (glyph_height * letter_height);
+                // The positioning in IE is off, so we need to modify the y_pos when
+                // canvas is not supported and we are using VML instead.
+                if(!isCanvasSupported()) {
+                  y_pos = y_pos + (glyph_height * (letter_height / 2));
+                }
+
+                this.contexts[context_num].font = "bold 350px Arial";
+                this.contexts[context_num].textAlign = "center";
+                this.contexts[context_num].fillStyle = this.colors[values[0]];
+                // fonts are scaled to fit into the column width
+                // formula is y = 0.0024 * col_width + 0.0405
+                x_scale = ((0.0024 * this.zoomed_column) + 0.0405).toFixed(2);
+                this.contexts[context_num].transform (x_scale, 0, 0, letter_height, x_pos, y_pos);
+                this.contexts[context_num].fillText(values[0], 0, 0);
+                this.contexts[context_num].setTransform (1, 0, 0, 1, 0, 0);
+                previous_height = previous_height + glyph_height;
               }
-
-              this.contexts[context_num].font = "bold 350px Arial";
-              this.contexts[context_num].textAlign = "center";
-              this.contexts[context_num].fillStyle = this.colors[values[0]];
-              // fonts are scaled to fit into the column width
-              // formula is y = 0.0024 * col_width + 0.0405
-              x_scale = ((0.0024 * this.zoomed_column) + 0.0405).toFixed(2);
-              this.contexts[context_num].transform (x_scale, 0, 0, letter_height, x_pos, y_pos);
-              this.contexts[context_num].fillText(values[0], 0, 0);
-              this.contexts[context_num].setTransform (1, 0, 0, 1, 0, 0);
-              previous_height = previous_height + glyph_height;
             }
           }
         }
@@ -595,7 +615,6 @@
     }
 
     $(document).bind("scrolledTo", function(e, left, top, zoom) {
-        console.log(left);
       var hmm_logo = logo;
       logo.render({target: left});
     });
