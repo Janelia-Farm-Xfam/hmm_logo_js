@@ -5,11 +5,14 @@
     return !!(elem.getContext && elem.getContext('2d'));
   }
 
+
   function HMMLogo(options) {
     options = (options) ? options : {};
+
     this.column_width = options.column_width || 34;
     this.height = options.height || 300;
     this.data = options.data || null;
+    this.scale_height_enabled = options.scaled_max || null;
 
     this.alphabet = options.alphabet || 'dna';
     this.dom_element = options.dom_element || $('body');
@@ -18,10 +21,12 @@
     this.zoom = options.zoom || 1;
 
     if (options.scaled_max) {
-      this.data.max_height = options.data.max_height_obs;
-    }
-    else {
-      this.data.max_height = options.data.max_height_theory;
+      if (options.data.max_height_obs) {
+        this.data.max_height = options.data.max_height_obs;
+      }
+      else {
+        this.data.max_height = options.data.max_height_theory;
+      }
     }
 
 
@@ -83,6 +88,7 @@
       options    = (options) ? options : {};
       var zoom   = options.zoom || this.zoom;
       var target = options.target || 1;
+      var scaled = options.scaled || null;
 
       if (target === this.previous_target) {
         return;
@@ -190,9 +196,13 @@
       }
     }
 
+    this.render_x_axis = function () {
+      $(this.dom_element).parent().before('<p id="logo_xaxis" class="centered" style="margin-left:40px">Model Position</p>');
+    };
+
     this.render_y_axis = function () {
       //attach a canvas for the y-axis
-      $(this.dom_element).parent().before('<p class="centered" style="margin-left:40px">Model Position</p><canvas id="logo_yaxis" class="logo_yaxis" height="300" width="40"></canvas>');
+      $(this.dom_element).parent().before('<canvas id="logo_yaxis" class="logo_yaxis" height="300" width="40"></canvas>');
       var canvas = $('#logo_yaxis');
       if(!isCanvasSupported()) {
         canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
@@ -226,6 +236,8 @@
       context.fillText("Information Content", 1, 0);
       context.restore();
     }
+
+    this.render_x_axis();
     this.render_y_axis();
 
     this.render_with_text = function(start, end, context_num, fontsize) {
@@ -372,6 +384,34 @@
         column_num++;
       }
 
+    }
+
+    this.toggle_scale = function() {
+      // work out the current column we are on so we can return there
+      var before_left = this.scrollme.scroller.getValues().left;
+      var col_width = (this.column_width * this.zoom);
+      var col_count = before_left / col_width;
+      var half_visible_columns = ($('#logo_container').width() / col_width) / 2;
+      var col_total = Math.ceil(col_count + half_visible_columns);
+
+      // toggle the max height
+      if(this.data.max_height === this.data.max_height_obs) {
+        this.data.max_height = this.data.max_height_theory;
+      }
+      else {
+        this.data.max_height = this.data.max_height_obs;
+      }
+      // reset the redered counter so that each section will re-render
+      // with the new heights
+      this.rendered = [];
+      //update the y-axis
+      $('#logo_yaxis').remove();
+      this.render_y_axis();
+
+      // re-flow and re-render the content
+      this.scrollme.reflow();
+      //scroll back to the location we started at.
+      this.scrollToColumn(col_total);
     }
 
     this.change_zoom = function(zoom_level) {
@@ -546,13 +586,18 @@
 
     if(Modernizr.canvas) {
 
-      $(this).parent().after('<form>' +
-        '<label for="zoom">Zoom level</label><button id="zoomout" class="button">-</button>' +
-        '<input type="hidden" id="zoom" name="zoom" value="'+ zoom + '"></input><button id="zoomin" class="button">+</button><button class="button" id="zoom_reset">Reset</button></form>' +
-        '<form><label for="position">Column number</label>' +
+      var form = $('<form>');
+ 
+      if( logo.scale_height_enabled ) {
+        form.append('<button id="scale" class="button">Scale Toggle</button><br/>');
+      }
+      form.append('<label for="zoom">Zoom level</label><button id="zoomout" class="button">-</button>'+
+        '<input type="hidden" id="zoom" name="zoom" value="'+ zoom + '"></input><button id="zoomin" class="button">+</button><button class="button" id="zoom_reset">Reset</button>');
+
+      $(this).parent().after('<form><label for="position">Column number</label>' +
         '<input type="text" name="position" id="position"></input>' +
         '<button class="button" id="logo_change">Go</button>' +
-        '</form>');
+        '</form>').after(form);
 
       $('#zoom_reset').bind('click', function(e) {
         e.preventDefault();
@@ -597,6 +642,11 @@
         hmm_logo.change_zoom(this.value);
       });
 
+      $('#scale').bind('click', function(e) {
+        e.preventDefault();
+        var hmm_logo = logo;
+        hmm_logo.toggle_scale();
+      });
 
       $('#position').bind('change', function() {
         var hmm_logo = logo;
