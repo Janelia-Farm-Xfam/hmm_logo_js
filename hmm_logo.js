@@ -12,21 +12,19 @@
     this.column_width = options.column_width || 34;
     this.height = options.height || 300;
     this.data = options.data || null;
-    this.scale_height_enabled = options.scaled_max || null;
+    this.scale_height_enabled = options.height_toggle || null;
 
     this.alphabet = options.alphabet || 'dna';
     this.dom_element = options.dom_element || $('body');
     this.start = options.start || 1;
     this.end = options.end || this.data.height_arr.length;
-    this.zoom = options.zoom || 1;
+    this.zoom = options.zoom || 0.3;
 
     if (options.scaled_max) {
-      if (options.data.max_height_obs) {
-        this.data.max_height = options.data.max_height_obs;
-      }
-      else {
-        this.data.max_height = options.data.max_height_theory;
-      }
+      this.data.max_height = options.data.max_height_obs || this.data.max_height || 2;
+    }
+    else {
+      this.data.max_height = options.data.max_height_theory || this.data.max_height || 2;
     }
 
 
@@ -579,7 +577,7 @@
   $.fn.hmm_logo = function(options) {
     options = (options) ? options : {};
     options.dom_element = $(this);
-    var zoom = options.zoom || 1;
+    var zoom = options.zoom || 0.3;
 
     var logo = new HMMLogo(options);
     logo.render(options);
@@ -601,8 +599,9 @@
 
       $('#zoom_reset').bind('click', function(e) {
         e.preventDefault();
+        var default_zoom = options.zoom;
         var zoom = $('#zoom');
-        zoom[0].value = 1;
+        zoom[0].value = default_zoom;
         zoom.trigger('change');
       });
 
