@@ -13,6 +13,12 @@
     this.height = options.height || 300;
     this.data = options.data || null;
     this.scale_height_enabled = options.height_toggle || null;
+    if (options.zoom_buttons && options.zoom_buttons === 'disabled') {
+      this.zoom_enabled = null;
+    }
+    else {
+      this.zoom_enabled = true;
+    }
 
     this.alphabet = options.alphabet || 'dna';
     this.dom_element = options.dom_element || $('body');
@@ -589,8 +595,11 @@
       if( logo.scale_height_enabled ) {
         form.append('<button id="scale" class="button">Scale Toggle</button><br/>');
       }
-      form.append('<label for="zoom">Zoom level</label><button id="zoomout" class="button">-</button>'+
+
+      if ( logo.zoom_enabled ) {
+        form.append('<label for="zoom">Zoom level</label><button id="zoomout" class="button">-</button>'+
         '<input type="hidden" id="zoom" name="zoom" value="'+ zoom + '"></input><button id="zoomin" class="button">+</button><button class="button" id="zoom_reset">Reset</button>');
+      }
 
       $(this).parent().after('<form><label for="position">Column number</label>' +
         '<input type="text" name="position" id="position"></input>' +
