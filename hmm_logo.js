@@ -24,7 +24,8 @@
     this.dom_element = options.dom_element || $('body');
     this.start = options.start || 1;
     this.end = options.end || this.data.height_arr.length;
-    this.zoom = options.zoom || 0.3;
+    this.zoom = parseFloat(options.zoom) || 0.3;
+    this.default_zoom = this.zoom;
 
     if (options.scaled_max) {
       this.data.max_height = options.data.max_height_obs || this.data.max_height || 2;
@@ -418,21 +419,45 @@
       this.scrollToColumn(col_total);
     }
 
-    this.change_zoom = function(zoom_level) {
-      //work out my current position
-      var before_left = this.scrollme.scroller.getValues().left;
+    this.change_zoom = function(options) {
+      var zoom_level = 0.3;
+      if (options.target) {
+        zoom_level = options.target;
+      }
+      else if(options.distance) {
+        zoom_level = (parseFloat(this.zoom) - parseFloat(options.distance)).toFixed(1);
+        if (options.direction === '+') {
+          zoom_level = (parseFloat(this.zoom) + parseFloat(options.distance)).toFixed(1);
+        }
+      }
 
-      var col_width = (this.column_width * this.zoom);
-      var col_count = before_left / col_width;
-      var half_visible_columns = ($('#logo_container').width() / col_width) / 2;
-      var col_total = Math.ceil(col_count + half_visible_columns);
+      if (zoom_level > 1) {
+        zoom_level = 1;
+      }
+      else if (zoom_level < 0.1) {
+        zoom_level = 0.1;
+      }
 
-      this.zoom = zoom_level;
-      this.render({zoom: this.zoom});
-      this.scrollme.reflow();
+      // see if we need to zoom or not
+      var expected_width = ($('#logo_graphic').width() * zoom_level ) / this.zoom;
+      if (expected_width > $('#logo_container').width()) {
+        //work out my current position
+        var before_left = this.scrollme.scroller.getValues().left;
 
-      //scroll to previous position
-      this.scrollToColumn(col_total);
+        var col_width = (this.column_width * this.zoom);
+        var col_count = before_left / col_width;
+        var half_visible_columns = ($('#logo_container').width() / col_width) / 2;
+        var col_total = Math.ceil(col_count + half_visible_columns);
+
+
+        this.zoom = zoom_level;
+        this.render({zoom: this.zoom});
+        this.scrollme.reflow();
+
+        //scroll to previous position
+        this.scrollToColumn(col_total);
+      }
+      return this.zoom;
     }
 
     this.scrollToColumn = function(num, animate) {
@@ -598,7 +623,7 @@
 
       if ( logo.zoom_enabled ) {
         form.append('<label for="zoom">Zoom level</label><button id="zoomout" class="button">-</button>'+
-        '<input type="hidden" id="zoom" name="zoom" value="'+ zoom + '"></input><button id="zoomin" class="button">+</button><button class="button" id="zoom_reset">Reset</button>');
+        '<button id="zoomin" class="button">+</button><button id="logo_reset" class="button">Reset</button>');
       }
 
       $(this).parent().after('<form><label for="position">Column number</label>' +
@@ -614,40 +639,26 @@
         zoom.trigger('change');
       });
 
+      $('#logo_reset').bind('click', function(e) {
+        e.preventDefault();
+        var hmm_logo = logo;
+        hmm_logo.change_zoom({'target': hmm_logo.default_zoom});
+      });
+
       $('#logo_change').bind('click', function(e) {
         e.preventDefault();
       });
 
       $('#zoomin').bind('click', function (e) {
         e.preventDefault();
-        var zoom = $('#zoom')
-        var current = parseFloat(zoom[0].value);
-        var next = (current + 0.1).toFixed(1);
-        if (next > 1) {
-          next = 1;
-        }
-        zoom[0].value = next;
-        zoom.trigger('change');
+        var hmm_logo = logo;
+        hmm_logo.change_zoom({'distance': 0.1, 'direction': '+'});
       });
 
       $('#zoomout').bind('click', function (e) {
         e.preventDefault();
-        var zoom = $('#zoom')
-        var current = parseFloat(zoom[0].value);
-        var next = (current - 0.1).toFixed(1);
-        if (next < 0.1) {
-          next = 0.1;
-        }
-        zoom[0].value = next;
-        zoom.trigger('change');
-      });
-
-      $('#zoom').bind('change', function() {
         var hmm_logo = logo;
-        if (!this.value.match(/^\d+\.?\d?$/m)) {
-          return;
-        }
-        hmm_logo.change_zoom(this.value);
+        hmm_logo.change_zoom({'distance': 0.1, 'direction': '-'});
       });
 
       $('#scale').bind('click', function(e) {
@@ -670,18 +681,14 @@
         var x = parseInt((e.pageX - offset.left));
         var hmm_logo = logo;
         var half_viewport = ($('#logo_container').width() / 2);
-        console.log([x,half_viewport, x - half_viewport]);
         hmm_logo.scrollme.scroller.scrollTo(x - half_viewport, 0, 0);
-        var zoom = $('#zoom')
-        var current = parseFloat(zoom[0].value);
 
-        if (current >= 0.5) {
-          zoom[0].value = 0.3;
-          zoom.trigger('change');
+        var current = hmm_logo.zoom;
+        if (current < 1) {
+          hmm_logo.change_zoom({'target':1});
         }
         else {
-          zoom[0].value = 1;
-          zoom.trigger('change');
+          hmm_logo.change_zoom({'target':0.3});
         }
       });
 
@@ -702,11 +709,11 @@
       if(!e.ctrlKey) {
         if (e.which === 61 || e.which == 107) {
           zoom += 0.1;
-          logo.change_zoom(zoom);
+          logo.change_zoom({'distance': 0.1, 'direction': '+'});
         }
         if (e.which === 109 || e.which == 0) {
           zoom = zoom - 0.1;
-          logo.change_zoom(zoom);
+          logo.change_zoom({'distance': 0.1, 'direction': '-'});
         }
       }
     });
