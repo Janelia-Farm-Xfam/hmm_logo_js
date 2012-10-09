@@ -664,6 +664,27 @@
         hmm_logo.scrollToColumn(this.value, 1);
       });
 
+      $('#logo_graphic').bind('dblclick', function(e) {
+        // need to get coordinates, then scroll to location and zoom.
+        var offset = $(this).offset();
+        var x = parseInt((e.pageX - offset.left));
+        var hmm_logo = logo;
+        var half_viewport = ($('#logo_container').width() / 2);
+        console.log([x,half_viewport, x - half_viewport]);
+        hmm_logo.scrollme.scroller.scrollTo(x - half_viewport, 0, 0);
+        var zoom = $('#zoom')
+        var current = parseFloat(zoom[0].value);
+
+        if (current >= 0.5) {
+          zoom[0].value = 0.3;
+          zoom.trigger('change');
+        }
+        else {
+          zoom[0].value = 1;
+          zoom.trigger('change');
+        }
+      });
+
     }
 
     if(!Modernizr.canvas) {
