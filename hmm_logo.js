@@ -75,17 +75,16 @@
 
     this.canvas_width = 5000;
 
-    if (Modernizr.canvas) {
-      this.scrollme = new EasyScroller($(this.dom_element)[0], {
-        scrollingX: 1,
-        scrollingY: 0
-      });
-    }
+    // this needs to be set to null here so that we can initialise it after
+    // the render function has fired and the width determined.
+    this.scrollme = null;
 
     this.previous_target = 0;
+    // keeps track of which canvas elements have been drawn and which ones haven't.
     this.rendered = [];
     this.previous_zoom = 0;
 
+    // the main render function that draws the logo based on the provided options.
     this.render = function(options) {
       if (!this.data) {
         return;
@@ -136,7 +135,6 @@
       if (target > this.total_width) {
         target = this.total_width;
       }
-
       $(this.dom_element).attr({'width':this.total_width + 'px'}).css({width:this.total_width + 'px'});
 
       var canvas_count = Math.ceil(this.total_width / this.canvas_width);
@@ -172,6 +170,7 @@
         var canv_end = canv_start + adjusted_width;
 
         if (target < canv_end + (canv_end / 2) && target > canv_start - (canv_start / 2)) {
+          // Check that we aren't redrawing the canvas and if not, then attach it and draw.
           if (this.rendered[i] !== 1) {
 
             this.canvases[i] = attach_canvas(this.dom_element, this.height, adjusted_width, i, max_canvas_width);
@@ -194,6 +193,22 @@
           }
         }
 
+      }
+
+      // check if the scroller object has been initialised and if not then do so.
+      // we do this here as opposed to at object creation, because we need to
+      // make sure the logo has been rendered and the width is correct, otherwise
+      // we get a weird initial state where the canvas will bounce back to the
+      // beginning the first time it is scrolled, because it thinks it has a
+      // width of 0.
+      if (!this.scrollme) {
+        console.log('init scroller');
+        if (Modernizr.canvas) {
+          this.scrollme = new EasyScroller($(this.dom_element)[0], {
+            scrollingX: 1,
+            scrollingY: 0
+          });
+        }
       }
 
       if (target !== 1 && Modernizr.canvas) {
