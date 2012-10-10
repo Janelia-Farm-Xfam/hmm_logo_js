@@ -435,6 +435,8 @@
 
       // re-flow and re-render the content
       this.scrollme.reflow();
+      //scroll off by one to force a render of the canvas.
+      this.scrollToColumn(col_total +1);
       //scroll back to the location we started at.
       this.scrollToColumn(col_total);
     }
