@@ -1,8 +1,13 @@
 (function ($) {
 
+  var canv_support = null;
+
   function isCanvasSupported(){
-    var elem = document.createElement('canvas');
-    return !!(elem.getContext && elem.getContext('2d'));
+    if (!canv_support) {
+      var elem = document.createElement('canvas');
+      canv_support = !!(elem.getContext && elem.getContext('2d'));
+    }
+    return canv_support;
   }
 
 
