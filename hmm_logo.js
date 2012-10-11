@@ -463,30 +463,50 @@
       // see if we need to zoom or not
       var expected_width = ($('#logo_graphic').width() * zoom_level ) / this.zoom;
       if (expected_width > $('#logo_container').width()) {
-        //work out my current position
-        var before_left = this.scrollme.scroller.getValues().left;
+        // if a center is not specified, then use the current center of the view
+        if (!options.column) {
+          //work out my current position
+          var before_left = this.scrollme.scroller.getValues().left;
 
-        var col_width = (this.column_width * this.zoom);
-        var col_count = before_left / col_width;
-        var half_visible_columns = ($('#logo_container').width() / col_width) / 2;
-        var col_total = Math.ceil(col_count + half_visible_columns);
+          var col_width = (this.column_width * this.zoom);
+          var col_count = before_left / col_width;
+          var half_visible_columns = ($('#logo_container').width() / col_width) / 2;
+          var col_total = Math.ceil(col_count + half_visible_columns);
 
 
-        this.zoom = zoom_level;
-        this.render({zoom: this.zoom});
-        this.scrollme.reflow();
+          this.zoom = zoom_level;
+          this.render({zoom: this.zoom});
+          this.scrollme.reflow();
 
-        //scroll to previous position
-        this.scrollToColumn(col_total);
+          //scroll to previous position
+          this.scrollToColumn(col_total);
+        }
+        else { // center around the mouse click position.
+          this.zoom = zoom_level;
+          this.render({zoom: this.zoom});
+          this.scrollme.reflow();
+
+          var coords = this.coordinatesFromColumn(options.column);
+          this.scrollme.scroller.scrollTo(coords - options.offset);
+        }
       }
       return this.zoom;
     }
 
-    this.scrollToColumn = function(num, animate) {
-      var half_view = ($('#logo_container').width() / 2) - ((this.column_width * this.zoom) / 2);
-      var new_column = num - 1;
-      var new_left = new_column  * (this.column_width * this.zoom);
+    this.columnFromCoordinates = function(x) {
+      var column = Math.ceil(x / (this.column_width * this.zoom));
+      return column;
+    }
 
+    this.coordinatesFromColumn = function(col) {
+      var new_column = col - 1;
+      var x = (new_column  * (this.column_width * this.zoom)) + ((this.column_width * this.zoom) / 2);
+      return x;
+    }
+
+    this.scrollToColumn = function(num, animate) {
+      var half_view = ($('#logo_container').width() / 2);
+      var new_left = this.coordinatesFromColumn(num);
       this.scrollme.scroller.scrollTo(new_left - half_view, 0, animate);
     }
 
@@ -698,20 +718,27 @@
       });
 
       $('#logo_graphic').bind('dblclick', function(e) {
-        // need to get coordinates, then scroll to location and zoom.
+        // need to get coordinates of mouse click
+        var hmm_logo = logo;
         var offset = $(this).offset();
         var x = parseInt((e.pageX - offset.left));
-        var hmm_logo = logo;
-        var half_viewport = ($('#logo_container').width() / 2);
-        hmm_logo.scrollme.scroller.scrollTo(x - half_viewport, 0, 0);
 
+        // get mouse position in the window
+        var window_position = e.pageX - $(this).parent().offset().left;
+
+        // get column number
+        var col = hmm_logo.columnFromCoordinates(x);
+
+        // choose new zoom level and zoom in.
         var current = hmm_logo.zoom;
         if (current < 1) {
-          hmm_logo.change_zoom({'target':1});
+          hmm_logo.change_zoom({'target':1, offset:window_position, column:col});
         }
         else {
-          hmm_logo.change_zoom({'target':0.3});
+          hmm_logo.change_zoom({'target':0.3, offset:window_position, column:col});
         }
+
+        return;
       });
 
     }
