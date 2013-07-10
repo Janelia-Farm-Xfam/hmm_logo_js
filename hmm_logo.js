@@ -387,11 +387,11 @@ function isCanvasSupported() {
       context.textBaseline = "top";
       context.fillText(this.data.max_height.toFixed(1), 28, 0);
       context.textBaseline = "middle";
-      context.fillText(parseFloat(this.data.max_height / 2).toFixed(1), 28, (271 / 2));
-      context.fillText('0', 28, 271);
+      context.fillText(parseFloat((this.data.max_height + this.data.min_height_obs) / 2).toFixed(1), 28, (271 / 2));
+      context.fillText(this.data.min_height_obs.toFixed(1), 28, 271);
       // draw the label
       context.save();
-      context.translate(10, this.height / 2);
+      context.translate(5, this.height / 2);
       context.rotate(-Math.PI / 2);
       context.textAlign = "center";
       context.font = "normal 12px Arial";
