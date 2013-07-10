@@ -358,38 +358,83 @@ function isCanvasSupported() {
       return;
     };
 
-    this.render_x_axis = function () {
+    this.render_x_axis_label = function () {
       $(this.dom_element).parent().before('<div id="logo_xaxis" class="centered" style="margin-left:40px"><p class="xaxis_text" style="width:10em;margin:1em auto">Model Position</p></div>');
     };
 
-    this.render_y_axis = function () {
+    this.render_y_axis_label = function () {
       //attach a canvas for the y-axis
       $(this.dom_element).parent().before('<canvas id="logo_yaxis" class="logo_yaxis" height="300" width="40"></canvas>');
-      var canvas = $('#logo_yaxis');
+      var canvas = $('#logo_yaxis'),
+        top_pix_height = 0,
+        bottom_pix_height = 0,
+        top_height = Math.abs(this.data.max_height),
+        bottom_height = Math.abs(this.data.min_height_obs);
       if(!isCanvasSupported()) {
         canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
       }
       var context = canvas[0].getContext('2d');
-      //draw tick marks
+      //draw min/max tick marks
       context.beginPath();
       context.moveTo(40, 1);
       context.lineTo(30, 1);
+
       context.moveTo(40, 271);
       context.lineTo(30, 271);
-      context.moveTo(40, (271 / 2));
-      context.lineTo(30, (271 / 2));
+
+
+      if (this.data.min_height_obs === 0) {
+        context.moveTo(40, (271 / 2));
+        context.lineTo(30, (271 / 2));
+      } else {
+        // we need to draw three more ticks.
+        // work out the center point
+        var total_height = top_height + bottom_height;
+
+        var top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height);
+        var bottom_percentage = Math.round((Math.abs(this.data.min_height_obs) * 100) / total_height);
+        //convert % to pixels
+        top_pix_height = Math.round((271 * top_percentage) / 100);
+        bottom_pix_height = 271 - top_pix_height;
+        // draw 0 tick
+        context.moveTo(40, top_pix_height + 1);
+        context.lineTo(30, top_pix_height + 1);
+        //draw top mid-point
+        context.moveTo(40, top_pix_height / 2);
+        context.lineTo(30, top_pix_height / 2);
+        //draw bottom mid-point
+        context.moveTo(40, top_pix_height + (bottom_pix_height / 2));
+        context.lineTo(30, top_pix_height + (bottom_pix_height / 2));
+      }
       context.lineWidth = 1;
       context.strokeStyle = "#666666";
       context.stroke();
-      context.fillStyle = "#000000";
+
+      //draw the label text
+      context.fillStyle = "#666666";
       context.textAlign = "right";
       context.font = "bold 10px Arial";
+
+      // draw the max label
       context.textBaseline = "top";
       context.fillText(this.data.max_height.toFixed(1), 28, 0);
       context.textBaseline = "middle";
-      context.fillText(parseFloat((this.data.max_height + this.data.min_height_obs) / 2).toFixed(1), 28, (271 / 2));
+
+      // draw the midpoint labels
+      if (this.data.min_height_obs === 0) {
+        context.fillText(parseFloat((this.data.max_height + this.data.min_height_obs) / 2).toFixed(1), 28, (271 / 2));
+      } else {
+        //draw 0
+        context.fillText(0, 28, top_pix_height + 1);
+        // draw top mid-point
+        context.fillText(parseFloat(top_height / 2).toFixed(1), 28, top_pix_height / 2);
+        //draw bottom mid-point
+        context.fillText(parseFloat(bottom_height / 2).toFixed(1), 28, top_pix_height + (bottom_pix_height / 2));
+      }
+      // draw the min label
       context.fillText(this.data.min_height_obs.toFixed(1), 28, 271);
-      // draw the label
+
+      // draw the axis label
       context.save();
       context.translate(5, this.height / 2);
       context.rotate(-Math.PI / 2);
@@ -399,8 +444,8 @@ function isCanvasSupported() {
       context.restore();
     };
 
-    this.render_x_axis();
-    this.render_y_axis();
+    this.render_x_axis_label();
+    this.render_y_axis_label();
 
     this.render_with_text = function (start, end, context_num, fontsize) {
       var x = 0,
@@ -567,7 +612,7 @@ function isCanvasSupported() {
       this.rendered = [];
       //update the y-axis
       $('#logo_yaxis').remove();
-      this.render_y_axis();
+      this.render_y_axis_label();
 
       // re-flow and re-render the content
       this.scrollme.reflow();
