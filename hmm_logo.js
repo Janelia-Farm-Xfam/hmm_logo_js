@@ -27,7 +27,7 @@ function isCanvasSupported() {
     this.dom_element = options.dom_element || $('body');
     this.start = options.start || 1;
     this.end = options.end || this.data.height_arr.length;
-    this.zoom = parseFloat(options.zoom) || 0.4;
+    this.zoom = parseFloat(options.zoom) || 0.3;
     this.default_zoom = this.zoom;
 
     if (options.scaled_max) {
@@ -531,6 +531,19 @@ function isCanvasSupported() {
         x += this.zoomed_column;
         column_num++;
       }
+      // draw horizontal divider line for 0
+      var top_height = Math.abs(this.data.max_height),
+        bottom_height = Math.abs(this.data.min_height_obs);
+      var total_height = top_height + bottom_height;
+
+      var top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height);
+      var bottom_percentage = Math.round((Math.abs(this.data.min_height_obs) * 100) / total_height);
+      //convert % to pixels
+      var top_pix_height = Math.round((271 * top_percentage) / 100);
+      draw_border(this.contexts[context_num], top_pix_height, this.total_width);
+
+
+      // draw other dividers
       draw_border(this.contexts[context_num], this.height - 15, this.total_width);
       draw_border(this.contexts[context_num], this.height - 30, this.total_width);
       draw_border(this.contexts[context_num], 0, this.total_width);
@@ -539,15 +552,24 @@ function isCanvasSupported() {
     this.render_with_rects = function (start, end, context_num) {
       var x = 0,
         column_num = start,
-        i = 0;
+        i = 0,
+        top_height = Math.abs(this.data.max_height),
+        bottom_height = Math.abs(this.data.min_height_obs),
+        total_height = top_height + bottom_height,
+        top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height),
+        //convert % to pixels
+        top_pix_height = Math.round((271 * top_percentage) / 100),
+        bottom_pix_height = 271 - top_pix_height;
+
       for (i = start; i <= end; i++) {
         if (this.data.mmline && this.data.mmline[i - 1] === 1) {
           this.contexts[context_num].fillStyle = '#cccccc';
           this.contexts[context_num].fillRect(x, 10, this.zoomed_column, this.height - 40);
         } else {
-          var column = this.data.height_arr[i - 1];
-          var previous_height = 0;
-          var letters = column.length;
+          var column = this.data.height_arr[i - 1],
+            previous_height = 0,
+            previous_neg_height = top_pix_height,
+            letters = column.length;
           var j = 0;
           for (j = 0; j < letters; j++) {
             var letter = column[j];
@@ -555,13 +577,24 @@ function isCanvasSupported() {
             if (values[1] > 0.01) {
               var letter_height = (1 * values[1]) / this.data.max_height;
               var x_pos = x;
-              var glyph_height = 258 * letter_height;
-              var y_pos = 269 - previous_height - glyph_height;
+              var glyph_height = top_pix_height * letter_height;
+              var y_pos = top_pix_height - previous_height - glyph_height;
 
               this.contexts[context_num].fillStyle = this.colors[values[0]];
               this.contexts[context_num].fillRect(x_pos, y_pos, this.zoomed_column, glyph_height);
 
               previous_height = previous_height + glyph_height;
+            }
+            else {
+              //render the negatives
+              var letter_height = Math.abs(values[1]) / Math.abs(this.data.min_height_obs);
+              var x_pos = x;
+              var glyph_height = bottom_pix_height * letter_height;
+              var y_pos = previous_neg_height;
+              this.contexts[context_num].fillStyle = this.colors[values[0]];
+              this.contexts[context_num].fillRect(x_pos, y_pos, this.zoomed_column, glyph_height);
+
+              previous_neg_height = previous_neg_height + glyph_height;
             }
           }
         }
@@ -586,6 +619,12 @@ function isCanvasSupported() {
 
         // draw insert probabilities/lengths
         draw_small_insert(this.contexts[context_num], x, this.height - 28, this.zoomed_column, this.data.insert_probs[i - 1] / 100, this.data.insert_lengths[i - 1]);
+
+        // draw horizontal divider line for 0
+        draw_border(this.contexts[context_num], top_pix_height, this.total_width);
+        // draw other dividers
+        draw_border(this.contexts[context_num], this.height - 30, this.total_width);
+        draw_border(this.contexts[context_num], 0, this.total_width);
 
         x += this.zoomed_column;
         column_num++;
