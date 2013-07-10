@@ -461,6 +461,7 @@ function isCanvasSupported() {
         // this is used to transform the 271px high letters into the correct size
         // when displaying negative values, so that they fit above the 0 line.
         top_pix_conversion = top_pix_height / 271;
+        bottom_pix_conversion = bottom_pix_height / 271;
 
       // add 3 extra columns so that numbers don't get clipped at the end of a canvas
       // that ends before a large column. DF0000830 was suffering at zoom level 0.6,
@@ -508,7 +509,28 @@ function isCanvasSupported() {
                 previous_height = previous_height + glyph_height;
               }
               else {
-                //console.log('drawing negative');
+                var letter_height = (1 * Math.abs(values[1])) / Math.abs(this.data.min_height_obs);
+                var x_pos = x + (this.zoomed_column / 2);
+                var glyph_height = bottom_pix_height * letter_height;
+                var y_pos = glyph_height + previous_neg_height;
+
+                // The positioning in IE is off, so we need to modify the y_pos when
+                // canvas is not supported and we are using VML instead.
+                if(!isCanvasSupported()) {
+                  y_pos = y_pos + (glyph_height * (letter_height / 2));
+                }
+
+
+                this.contexts[context_num].font = "bold 350px Arial";
+                this.contexts[context_num].textAlign = "center";
+                this.contexts[context_num].fillStyle = this.colors[values[0]];
+                // fonts are scaled to fit into the column width
+                // formula is y = 0.0024 * col_width + 0.0405
+                var x_scale = ((0.0024 * this.zoomed_column) + 0.0405).toFixed(2);
+                this.contexts[context_num].transform(x_scale, 0, 0, bottom_pix_conversion * letter_height, x_pos, y_pos);
+                this.contexts[context_num].fillText(values[0], 0, 0);
+                this.contexts[context_num].setTransform(1, 0, 0, 1, 0, 0);
+                previous_neg_height = previous_neg_height + glyph_height;
               }
             }
           }
