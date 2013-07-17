@@ -5,11 +5,6 @@
   <head>
     <meta charset="utf-8">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="../../dfam/Server/root/static/js/libs/modernizr-2.0.6.min.js"></script>
-    <script src="../scroller/src/Raf.js"></script>
-    <script src="../scroller/src/Animate.js"></script>
-    <script src="../scroller/src/Scroller.js"></script>
-    <script src="../scroller/src/EasyScroller.js"></script>
     <script src="hmm_logo.js"></script>
     <title>javascript HMM Logos</title>
     <style>
@@ -41,7 +36,7 @@
   }
 }
 
-#logo_container {
+.logo_container {
   position:relative;
   height: 300px;
   overflow:hidden;
@@ -49,7 +44,7 @@
   border:1px solid #999;
 }
 
-#logo_graphic {
+.logo_graphic {
   position:absolute;
   height:300px;
   background-color: #E4F0C4;
@@ -87,7 +82,7 @@
   top:0;
 }
 
-#divider {
+.logo_divider {
   background: rgba(256,0,0,0.1);
   position:absolute;
   top:0;
@@ -111,22 +106,15 @@
 
         var zoom         = 1;
         var column_width = 34;
-        $('#logo_graphic').hmm_logo({column_width: 34, data: logo_data, alphabet: 'dna', height_toggle: 'enabled'});
+        $('#logo').hmm_logo({column_width: 34, data: logo_data, height_toggle: 'enabled'});
 
       });
     </script>
   </head>
   <body>
-    <div class="logo">
-      <div id="logo">
-        <div id="logo_container">
-          <div id="logo_graphic">
-            <!--[if lt IE 9]><canvas id="canv" height="300" width="20000"></canvas><![endif]-->
-          </div>
-          <div id="divider"></div>
-        </div>
-      </div>
+    <div id="logo">
+      <!--[if lt IE 9]><canvas id="canv" height="300" width="20000"></canvas><![endif]-->
     </div>
-    <!--[if lt IE 9]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
+   <!--[if lt IE 9]><script type="text/javascript" src="../excanvas/excanvas.js"></script><![endif]-->
   </body>
 </html>
