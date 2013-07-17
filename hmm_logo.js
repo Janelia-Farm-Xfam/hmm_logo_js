@@ -788,21 +788,21 @@
       options.dom_element = logo_graphic;
 
       var zoom = options.zoom || 0.3,
-        form = $('<form id="logo_form"><fieldset><label for="position">Column number</label>' +
-          '<input type="text" name="position" id="position"></input>' +
-          '<button class="button" id="logo_change">Go</button></fieldset>' +
+        form = $('<form class="logo_form"><fieldset><label for="position">Column number</label>' +
+          '<input type="text" name="position" class="logo_position"></input>' +
+          '<button class="button" class="logo_change">Go</button></fieldset>' +
           '</form>');
 
       logo = new HMMLogo(options);
       logo.render(options);
 
       if (logo.scale_height_enabled && options.data.min_height_obs >= 0) {
-        form.append('<button id="scale" class="button">Toggle Scale</button><br/>');
+        form.append('<button class="logo_scale button">Toggle Scale</button><br/>');
       }
 
       if (logo.zoom_enabled) {
-        form.append('<button class="zoomout button">-</button>' +
-          '<button class="zoomin button">+</button>');
+        form.append('<button class="logo_zoomout button">-</button>' +
+          '<button class="logo_zoomin button">+</button>');
       }
       $(this).append(form);
 
@@ -823,29 +823,29 @@
         hmm_logo.change_zoom({'target': hmm_logo.default_zoom});
       });
 
-      $('#logo_change').bind('click', function (e) {
+      $('.logo_change').bind('click', function (e) {
         e.preventDefault();
       });
 
-      $('.zoomin').bind('click', function (e) {
+      $('.logo_zoomin').bind('click', function (e) {
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.change_zoom({'distance': 0.1, 'direction': '+'});
       });
 
-      $('.zoomout').bind('click', function (e) {
+      $('.logo_zoomout').bind('click', function (e) {
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.change_zoom({'distance': 0.1, 'direction': '-'});
       });
 
-      $('#scale').bind('click', function (e) {
+      $('.logo_scale').bind('click', function (e) {
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.toggle_scale();
       });
 
-      $('#position').bind('change', function () {
+      $('.logo_position').bind('change', function () {
         var hmm_logo = logo;
         if (!this.value.match(/^\d+$/m)) {
           return;
