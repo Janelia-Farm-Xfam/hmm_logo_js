@@ -28,6 +28,7 @@
 
     this.alphabet = options.data.alphabet || 'dna';
     this.dom_element = options.dom_element || $('body');
+    this.called_on = options.called_on || null;
     this.start = options.start || 1;
     this.end = options.end || this.data.height_arr.length;
     this.zoom = parseFloat(options.zoom) || 0.4;
@@ -363,13 +364,13 @@
     };
 
     this.render_x_axis_label = function () {
-      $(this.dom_element).parent().before('<div id="logo_xaxis" class="centered" style="margin-left:40px"><p class="xaxis_text" style="width:10em;margin:1em auto">Model Position</p></div>');
+      $(this.dom_element).parent().before('<div class="logo_xaxis" class="centered" style="margin-left:40px"><p class="xaxis_text" style="width:10em;margin:1em auto">Model Position</p></div>');
     };
 
     this.render_y_axis_label = function () {
       //attach a canvas for the y-axis
-      $(this.dom_element).parent().before('<canvas id="logo_yaxis" class="logo_yaxis" height="300" width="40"></canvas>');
-      var canvas = $('#logo_yaxis'),
+      $(this.dom_element).parent().before('<canvas class="logo_yaxis" height="300" width="40"></canvas>');
+      var canvas = $(this.called_on).find('.logo_yaxis'),
         top_pix_height = 0,
         bottom_pix_height = 0,
         top_height = Math.abs(this.data.max_height),
@@ -546,28 +547,25 @@
 
         if (this.zoom < 0.7) {
           if (i % 5 === 0) {
-            // draw column dividers
-            draw_ticks(this.contexts[context_num], x + this.zoomed_column, this.height - 30, -30 + this.height, '#dddddd');
-            // draw top ticks
-            draw_ticks(this.contexts[context_num], x + this.zoomed_column, 0, 5);
-            // draw column numbers
-            draw_column_number(this.contexts[context_num], x + 2, 10, this.zoomed_column, column_num, 10, true);
+            this.draw_column_divider({
+              context_num : context_num,
+              x : x,
+              fontsize: 10,
+              column_num: column_num,
+              ralign: true
+            });
           }
         } else {
-          // draw column dividers
-          draw_ticks(this.contexts[context_num], x, this.height - 30, -30 + this.height, '#dddddd');
-          // draw top ticks
-          draw_ticks(this.contexts[context_num], x, 0, 5);
-          // draw column numbers
-          draw_column_number(this.contexts[context_num], x, 10, this.zoomed_column, column_num, fontsize);
+          this.draw_column_divider({
+            context_num : context_num,
+            x : x,
+            fontsize: fontsize,
+            column_num: column_num
+          });
         }
-
-
 
         draw_insert_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.insert_probs[i - 1] / 100, fontsize);
         draw_insert_length(this.contexts[context_num], x, this.height - 5, this.zoomed_column, this.data.insert_lengths[i - 1], fontsize);
-
-
 
         x += this.zoomed_column;
         column_num++;
@@ -579,6 +577,17 @@
       draw_border(this.contexts[context_num], this.height - 15, this.total_width);
       draw_border(this.contexts[context_num], this.height - 30, this.total_width);
       draw_border(this.contexts[context_num], 0, this.total_width);
+    };
+
+    this.draw_column_divider = function (opts) {
+      var div_x = opts.ralign ? opts.x + this.zoomed_column : opts.x,
+        num_x = opts.ralign ? opts.x + 2 : opts.x;
+      // draw column dividers
+      draw_ticks(this.contexts[opts.context_num], div_x, this.height - 30, -30 + this.height, '#dddddd');
+      // draw top ticks
+      draw_ticks(this.contexts[opts.context_num], div_x, 0, 5);
+      // draw column numbers
+      draw_column_number(this.contexts[opts.context_num], num_x, 10, this.zoomed_column, opts.column_num, opts.fontsize, opts.ralign);
     };
 
     this.draw_zero_divider = function (context_num) {
@@ -690,7 +699,7 @@
       // with the new heights
       this.rendered = [];
       //update the y-axis
-      $('#logo_yaxis').remove();
+      $(this.called_on).find('.logo_yaxis').remove();
       this.render_y_axis_label();
 
       // re-flow and re-render the content
@@ -705,7 +714,7 @@
       var before_left = this.scrollme.scroller.getValues().left,
         col_width = (this.column_width * this.zoom),
         col_count = before_left / col_width,
-        half_visible_columns = ($('.logo_container').width() / col_width) / 2,
+        half_visible_columns = ($(this.called_on).find('.logo_container').width() / col_width) / 2,
         col_total = Math.ceil(col_count + half_visible_columns);
       return col_total;
     };
@@ -728,8 +737,8 @@
       }
 
       // see if we need to zoom or not
-      var expected_width = ($('.logo_graphic').width() * zoom_level) / this.zoom;
-      if (expected_width > $('.logo_container').width()) {
+      var expected_width = ($(this.called_on).find('.logo_graphic').width() * zoom_level) / this.zoom;
+      if (expected_width > $(this.called_on).find('.logo_container').width()) {
         // if a center is not specified, then use the current center of the view
         if (!options.column) {
           //work out my current position
@@ -765,7 +774,7 @@
     };
 
     this.scrollToColumn = function (num, animate) {
-      var half_view = ($('.logo_container').width() / 2),
+      var half_view = ($(this.called_on).find('.logo_container').width() / 2),
         new_left = this.coordinatesFromColumn(num);
       this.scrollme.scroller.scrollTo(new_left - half_view, 0, animate);
     };
@@ -786,11 +795,12 @@
       );
 
       options.dom_element = logo_graphic;
+      options.called_on = this;
 
       var zoom = options.zoom || 0.3,
         form = $('<form class="logo_form"><fieldset><label for="position">Column number</label>' +
           '<input type="text" name="position" class="logo_position"></input>' +
-          '<button class="button" class="logo_change">Go</button></fieldset>' +
+          '<button class="button logo_change">Go</button></fieldset>' +
           '</form>');
 
       logo = new HMMLogo(options);
