@@ -807,45 +807,35 @@
       $(this).append(form);
 
 
-
-
-      $('#zoom_reset').bind('click', function (e) {
-        e.preventDefault();
-        var default_zoom = options.zoom,
-          zoom = $('#zoom');
-        zoom[0].value = default_zoom;
-        zoom.trigger('change');
-      });
-
-      $('#logo_reset').bind('click', function (e) {
+      $(this).find('.logo_reset').bind('click', function (e) {
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.change_zoom({'target': hmm_logo.default_zoom});
       });
 
-      $('.logo_change').bind('click', function (e) {
+      $(this).find('.logo_change').bind('click', function (e) {
         e.preventDefault();
       });
 
-      $('.logo_zoomin').bind('click', function (e) {
+      $(this).find('.logo_zoomin').bind('click', function (e) {
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.change_zoom({'distance': 0.1, 'direction': '+'});
       });
 
-      $('.logo_zoomout').bind('click', function (e) {
+      $(this).find('.logo_zoomout').bind('click', function (e) {
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.change_zoom({'distance': 0.1, 'direction': '-'});
       });
 
-      $('.logo_scale').bind('click', function (e) {
+      $(this).find('.logo_scale').bind('click', function (e) {
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.toggle_scale();
       });
 
-      $('.logo_position').bind('change', function () {
+      $(this).find('.logo_position').bind('change', function () {
         var hmm_logo = logo;
         if (!this.value.match(/^\d+$/m)) {
           return;
@@ -853,7 +843,7 @@
         hmm_logo.scrollToColumn(this.value, 1);
       });
 
-      $('.logo_graphic').bind('dblclick', function (e) {
+      logo_graphic.bind('dblclick', function (e) {
         // need to get coordinates of mouse click
         var hmm_logo = logo,
           offset = $(this).offset(),
