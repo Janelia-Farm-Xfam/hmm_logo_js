@@ -134,6 +134,15 @@
       context.stroke();
     }
 
+    function draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill) {
+      context.font = fontsize + "px Arial";
+      context.fillStyle = fill;
+      context.fillRect(x, y - 10, col_width, 14);
+      context.textAlign = "center";
+      context.fillStyle = textfill;
+      context.fillText(text, x + (col_width / 2), y);
+    }
+
     function draw_insert_odds(context, x, height, col_width, text, fontsize) {
       var y        = height - 20,
         fill     = '#ffffff',
@@ -148,12 +157,7 @@
         fill = '#fdcc8a';
       }
 
-      context.font = fontsize + "px Arial";
-      context.fillStyle = fill;
-      context.fillRect(x, y - 10, col_width, 14);
-      context.textAlign = "center";
-      context.fillStyle = textfill;
-      context.fillText(text, x + (col_width / 2), y);
+      draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill);
 
       //draw vertical line to indicate where the insert would occur
       if (text > 0.1) {
@@ -173,21 +177,13 @@
       } else if (text > 4) {
         fill = '#bdd7e7';
       }
-      context.font = fontsize + "px Arial";
-      context.fillStyle = fill;
-      context.fillRect(x, y - 10, col_width, 14);
-      context.textAlign = "center";
-      context.fillStyle = textfill;
-      context.fillText(text, x + (col_width / 2), y);
+      draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill);
     }
+
 
     function draw_column_number(context, x, y, col_width, col_num, fontsize, right) {
       context.font = fontsize + "px Arial";
-      if (right) {
-        context.textAlign = "right";
-      } else {
-        context.textAlign = "center";
-      }
+      context.textAlign = right ? "right" : "center";
       context.fillStyle = "#666666";
       context.fillText(col_num, x + (col_width / 2), y);
     }
