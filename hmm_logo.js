@@ -161,7 +161,7 @@
 
       //draw vertical line to indicate where the insert would occur
       if (text > 0.1) {
-        draw_ticks(context, x + col_width, height - 30, -30 + height, fill);
+        draw_ticks(context, x + col_width, height - 30, -30 - height, fill);
       }
     }
 
@@ -579,7 +579,7 @@
       var div_x = opts.ralign ? opts.x + this.zoomed_column : opts.x,
         num_x = opts.ralign ? opts.x + 2 : opts.x;
       // draw column dividers
-      draw_ticks(this.contexts[opts.context_num], div_x, this.height - 30, -30 + this.height, '#dddddd');
+      draw_ticks(this.contexts[opts.context_num], div_x, this.height - 30, -30 - this.height, '#dddddd');
       // draw top ticks
       draw_ticks(this.contexts[opts.context_num], div_x, 0, 5);
       // draw column numbers
