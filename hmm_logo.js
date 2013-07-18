@@ -348,7 +348,8 @@
         if (canvasSupport()) {
           this.scrollme = new EasyScroller($(this.dom_element)[0], {
             scrollingX: 1,
-            scrollingY: 0
+            scrollingY: 0,
+            eventTarget: this.called_on
           });
         }
       }
@@ -875,7 +876,7 @@
         return;
       });
 
-      $(document).bind("scrolledTo", function (e, left, top, zoom) {
+      $(document).bind(this.attr('id') + ".scrolledTo", function (e, left, top, zoom) {
         var hmm_logo = logo;
         logo.render({target: left});
       });

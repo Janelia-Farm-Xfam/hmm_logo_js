@@ -527,7 +527,10 @@ var Scroller;
 			minZoom: 0.5,
 
 			/** Maximum zoom level */
-			maxZoom: 3
+			maxZoom: 3,
+
+      /** event target **/
+      eventTarget: null
 
 		};
 
@@ -960,7 +963,7 @@ var Scroller;
 		 */
 		scrollTo: function(left, top, animate, zoom) {
 
-      $(document).trigger("scrolledTo", [left, top, zoom] );
+      $(document).trigger(this.options.eventTarget.attr('id') +  ".scrolledTo", [left, top, zoom] );
 
 			var self = this;
 
