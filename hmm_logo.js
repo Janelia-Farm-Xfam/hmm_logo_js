@@ -3,9 +3,9 @@
 /** @license
  * HMM logo
  * http://github.com/url/here
- * Copyright 2013, HHMI.
+ * Copyright 2013, Jody Clements.
  * Licensed under the MIT License.
- *
+ * http://url/to/license
  */
 
 (function ($) {
