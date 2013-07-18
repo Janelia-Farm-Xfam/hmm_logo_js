@@ -1,4 +1,4 @@
-/*
+/** @license
  * Scroller
  * http://github.com/zynga/scroller
  *

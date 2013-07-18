@@ -1,5 +1,13 @@
 /*jslint browser:true */
 /*global G_vmlCanvasManager, EasyScroller */
+/** @license
+ * HMM logo
+ * http://github.com/url/here
+ * Copyright 2013, HHMI.
+ * Licensed under the MIT License.
+ *
+ */
+
 (function ($) {
   "use strict";
 
