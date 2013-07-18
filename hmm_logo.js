@@ -739,7 +739,7 @@
       logo = new HMMLogo(options);
       logo.render(options);
 
-      if (logo.scale_height_enabled && options.data.min_height_obs >= 0) {
+      if (logo.scale_height_enabled) {
         form.append('<button class="logo_scale button">Toggle Scale</button><br/>');
       }
 
