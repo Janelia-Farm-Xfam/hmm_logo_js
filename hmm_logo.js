@@ -790,6 +790,8 @@
         $('<div class="logo_container">').append(logo_graphic).append('<div class="logo_divider">')
       );
 
+      options.data = $(this).data('logo');
+
       options.dom_element = logo_graphic;
       options.called_on = this;
 
