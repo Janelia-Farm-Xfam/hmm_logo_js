@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# compress the javascript.
+/usr/bin/java -jar /opt/lib/java/compiler.jar --js hmm_logo.js --js scroller.js --js_output_file logo.min.js
+
+# compress the css
+/opt/bin/lessc --yui-compress style.css style.min.css
