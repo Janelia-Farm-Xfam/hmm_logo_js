@@ -808,6 +808,16 @@
         }
 
         return;
+      }).bind('click', function (e) {
+        var hmm_logo = logo,
+          offset = $(this).offset(),
+          x = parseInt((e.pageX - offset.left), 10),
+
+          // get mouse position in the window
+          window_position = e.pageX - $(this).parent().offset().left,
+
+          // get column number
+          col = hmm_logo.columnFromCoordinates(x);
       });
 
       $(document).bind(this.attr('id') + ".scrolledTo", function (e, left, top, zoom) {

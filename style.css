@@ -17,6 +17,7 @@
 }
 
 .logo_graphic {
+
   position:absolute;
   height:300px;
   background-color: #E4F0C4;
@@ -43,6 +44,7 @@
   -webkit-background-size: 50px 50px;
   -moz-background-size: 50px 50px;
   background-size: 50px 50px;
+  cursor: pointer;
 }
 
 .logo_yaxis {
