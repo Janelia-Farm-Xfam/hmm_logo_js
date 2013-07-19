@@ -811,17 +811,28 @@
         }
 
         return;
-      }).bind('click', function (e) {
-        var hmm_logo = logo,
-          offset = $(this).offset(),
-          x = parseInt((e.pageX - offset.left), 10),
-
-          // get mouse position in the window
-          window_position = e.pageX - $(this).parent().offset().left,
-
-          // get column number
-          col = hmm_logo.columnFromCoordinates(x);
       });
+
+      if (options.column_info) {
+        logo_graphic.bind('click', function (e) {
+          var hmm_logo = logo,
+            info_tab = $('<table><tr><th>Letter</th><th>score</th></tr></table>'),
+            offset = $(this).offset(),
+            x = parseInt((e.pageX - offset.left), 10),
+
+            // get mouse position in the window
+            window_position = e.pageX - $(this).parent().offset().left,
+
+            // get column number
+            col = hmm_logo.columnFromCoordinates(x);
+          $.each(logo.data.height_arr[col - 1].reverse(), function () {
+            var values = this.split(':', 2);
+            info_tab.append('<tr><td>' + values[0] + '</td><td>' + values[1] + '</td></tr>');
+          });
+
+          $(options.column_info).empty().append(info_tab);
+        });
+      }
 
       $(document).bind(this.attr('id') + ".scrolledTo", function (e, left, top, zoom) {
         var hmm_logo = logo;
