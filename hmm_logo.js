@@ -739,7 +739,10 @@
       logo = new HMMLogo(options);
       logo.render(options);
 
-      if (logo.scale_height_enabled) {
+      /* we don't want to toggle if the max height_obs is greater than max theoretical
+       * as letters will fall off the top.
+       */
+      if (logo.scale_height_enabled && (logo.data.max_height_obs < logo.data.max_height_theory)) {
         form.append('<button class="logo_scale button">Toggle Scale</button><br/>');
       }
 
