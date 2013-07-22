@@ -824,8 +824,12 @@
             window_position = e.pageX - $(this).parent().offset().left,
 
             // get column number
-            col = hmm_logo.columnFromCoordinates(x);
-          $.each(logo.data.height_arr[col - 1].reverse(), function () {
+            col = hmm_logo.columnFromCoordinates(x),
+            // clone the column data before reversal or the column gets messed
+            // up in the logo when zoom levels change. Also stops flip-flopping
+            // of the order from ascending to descending.
+            col_data = logo.data.height_arr[col - 1].slice(0);
+          $.each(col_data.reverse(), function (i) {
             var values = this.split(':', 2);
             info_tab.append('<tr><td>' + values[0] + '</td><td>' + values[1] + '</td></tr>');
           });
