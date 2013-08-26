@@ -166,7 +166,7 @@
     function draw_insert_odds(context, x, height, col_width, text, fontsize) {
       var y        = height - 20,
         fill     = '#ffffff',
-        textfill = '#000000';
+        textfill = '#555555';
 
       if (text > 0.1) {
         fill     = '#d7301f';
@@ -187,7 +187,7 @@
 
     function draw_insert_length(context, x, y, col_width, text, fontsize) {
       var fill = '#ffffff',
-        textfill = '#000000';
+        textfill = '#555555';
 
       if (text > 9) {
         fill     = '#d7301f';
@@ -203,7 +203,7 @@
     function draw_delete_odds(context, x, height, col_width, text, fontsize) {
       var y        = height - 35,
         fill     = '#ffffff',
-        textfill = '#000000';
+        textfill = '#555555';
 
       if (text > 0.25) {
         fill     = '#2171b5';
