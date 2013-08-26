@@ -98,29 +98,41 @@
     this.rendered = [];
     this.previous_zoom = 0;
 
-    function draw_small_insert(context, x, y, col_width, odds, length) {
+    function draw_small_insert(context, x, y, col_width, in_odds, in_length, del_odds) {
       var fill = "#ffffff";
-      if (odds > 0.1) {
+      if (in_odds > 0.1) {
         fill = '#d7301f';
-      } else if (odds > 0.05) {
+      } else if (in_odds > 0.05) {
         fill = '#fc8d59';
-      } else if (odds > 0.03) {
+      } else if (in_odds > 0.03) {
         fill = '#fdcc8a';
       }
       context.fillStyle = fill;
-      context.fillRect(x, y, col_width, 10);
+      context.fillRect(x, y + 12, col_width, 10);
 
       fill = "#ffffff";
       // draw insert length
-      if (length > 9) {
+      if (in_length > 9) {
+        fill = '#d7301f';
+      } else if (in_length > 7) {
+        fill = '#fc8d59';
+      } else if (in_length > 4) {
+        fill = '#fdcc8a';
+      }
+      context.fillStyle = fill;
+      context.fillRect(x, y + 24, col_width, 10);
+
+      fill = "#ffffff";
+      // draw delete odds
+      if (del_odds > 0.25) {
         fill = '#2171b5';
-      } else if (length > 7) {
+      } else if (del_odds > 0.15) {
         fill = '#6baed6';
-      } else if (length > 4) {
+      } else if (del_odds > 0.05) {
         fill = '#bdd7e7';
       }
       context.fillStyle = fill;
-      context.fillRect(x, y + 12, col_width, 10);
+      context.fillRect(x, y, col_width, 10);
     }
 
     function draw_border(context, y, width) {
@@ -178,14 +190,36 @@
         textfill = '#000000';
 
       if (text > 9) {
-        fill     = '#2171b5';
+        fill     = '#d7301f';
         textfill = '#ffffff';
       } else if (text > 7) {
-        fill = '#6baed6';
+        fill = '#fc8d59';
       } else if (text > 4) {
-        fill = '#bdd7e7';
+        fill = '#fdcc8a';
       }
       draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill);
+    }
+
+    function draw_delete_odds(context, x, height, col_width, text, fontsize) {
+      var y        = height - 35,
+        fill     = '#ffffff',
+        textfill = '#000000';
+
+      if (text > 0.25) {
+        fill     = '#2171b5';
+        textfill = '#ffffff';
+      } else if (text > 0.15) {
+        fill = '#6baed6';
+      } else if (text > 0.05) {
+        fill = '#bdd7e7';
+      }
+
+      draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill);
+
+      //draw vertical line to indicate where the delete would occur
+      if (text > 0.1) {
+        draw_ticks(context, x + col_width, height - 45, -45 - height, fill);
+      }
     }
 
 
@@ -389,12 +423,12 @@
       context.moveTo(40, 1);
       context.lineTo(30, 1);
 
-      context.moveTo(40, 271);
-      context.lineTo(30, 271);
+      context.moveTo(40, 256);
+      context.lineTo(30, 256);
 
 
-      context.moveTo(40, (271 / 2));
-      context.lineTo(30, (271 / 2));
+      context.moveTo(40, (256 / 2));
+      context.lineTo(30, (256 / 2));
       context.lineWidth = 1;
       context.strokeStyle = "#666666";
       context.stroke();
@@ -410,9 +444,9 @@
       context.textBaseline = "middle";
 
       // draw the midpoint labels
-      context.fillText(parseFloat(this.data.max_height / 2).toFixed(1), 28, (271 / 2));
+      context.fillText(parseFloat(this.data.max_height / 2).toFixed(1), 28, (256 / 2));
       // draw the min label
-      context.fillText('0', 28, 271);
+      context.fillText('0', 28, 256);
 
       // draw the axis label
       context.save();
@@ -436,12 +470,12 @@
         total_height = top_height + Math.abs(bottom_height),
         top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height),
         //convert % to pixels
-        top_pix_height = Math.round((271 * top_percentage) / 100),
-        bottom_pix_height = 271 - top_pix_height,
-        // this is used to transform the 271px high letters into the correct size
+        top_pix_height = Math.round((256 * top_percentage) / 100),
+        bottom_pix_height = 256 - top_pix_height,
+        // this is used to transform the 256px high letters into the correct size
         // when displaying negative values, so that they fit above the 0 line.
-        top_pix_conversion = top_pix_height / 271,
-        bottom_pix_conversion = bottom_pix_height / 271;
+        top_pix_conversion = top_pix_height / 256,
+        bottom_pix_conversion = bottom_pix_height / 256;
 
       // add 3 extra columns so that numbers don't get clipped at the end of a canvas
       // that ends before a large column. DF0000830 was suffering at zoom level 0.6,
@@ -475,7 +509,7 @@
               // just squash them out.
               if (values[1] > 0.01) {
                 letter_height = parseFloat(values[1]) / this.data.max_height;
-                var y_pos = 269 - previous_height;
+                var y_pos = 254 - previous_height;
                 var glyph_height = 258 * letter_height;
 
                 // The positioning in IE is off, so we need to modify the y_pos when
@@ -501,6 +535,8 @@
         draw_ticks(this.contexts[context_num], x, this.height - 15, 5);
         // draw insert probability ticks
         draw_ticks(this.contexts[context_num], x, this.height - 30, 5);
+        // draw delete probability ticks
+        draw_ticks(this.contexts[context_num], x, this.height - 45, 5);
 
         if (this.zoom < 0.7) {
           if (i % 5 === 0) {
@@ -521,6 +557,7 @@
           });
         }
 
+        draw_delete_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.delete_probs[i - 1] / 100, fontsize);
         draw_insert_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.insert_probs[i - 1] / 100, fontsize);
         draw_insert_length(this.contexts[context_num], x, this.height - 5, this.zoomed_column, this.data.insert_lengths[i - 1], fontsize);
 
@@ -532,6 +569,7 @@
       // draw other dividers
       draw_border(this.contexts[context_num], this.height - 15, this.total_width);
       draw_border(this.contexts[context_num], this.height - 30, this.total_width);
+      draw_border(this.contexts[context_num], this.height - 45, this.total_width);
       draw_border(this.contexts[context_num], 0, this.total_width);
     };
 
@@ -555,8 +593,8 @@
         total_height = top_height + bottom_height,
         top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height),
         //convert % to pixels
-        top_pix_height = Math.round((271 * top_percentage) / 100),
-        bottom_pix_height = 271 - top_pix_height,
+        top_pix_height = Math.round((256 * top_percentage) / 100),
+        bottom_pix_height = 256 - top_pix_height,
         mod = 10;
 
       for (i = start; i <= end; i++) {
@@ -575,8 +613,8 @@
             if (values[1] > 0.01) {
               var letter_height = parseFloat(values[1]) / this.data.max_height,
                 x_pos = x,
-                glyph_height = 271 * letter_height,
-                y_pos = 271 - previous_height - glyph_height;
+                glyph_height = 256 * letter_height,
+                y_pos = 256 - previous_height - glyph_height;
 
               this.contexts[context_num].fillStyle = this.colors[values[0]];
               this.contexts[context_num].fillRect(x_pos, y_pos, this.zoomed_column, glyph_height);
@@ -604,10 +642,10 @@
 
 
         // draw insert probabilities/lengths
-        draw_small_insert(this.contexts[context_num], x, this.height - 28, this.zoomed_column, this.data.insert_probs[i - 1] / 100, this.data.insert_lengths[i - 1]);
+        draw_small_insert(this.contexts[context_num], x, this.height - 42, this.zoomed_column, this.data.insert_probs[i - 1] / 100, this.data.insert_lengths[i - 1], this.data.delete_probs[i - 1] / 100);
 
         // draw other dividers
-        draw_border(this.contexts[context_num], this.height - 30, this.total_width);
+        draw_border(this.contexts[context_num], this.height - 45, this.total_width);
         draw_border(this.contexts[context_num], 0, this.total_width);
 
         x += this.zoomed_column;
