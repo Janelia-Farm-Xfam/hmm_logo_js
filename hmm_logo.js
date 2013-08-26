@@ -713,7 +713,6 @@
 
   }
 
-
   $.fn.hmm_logo = function (options) {
     var logo = null,
       logo_graphic = $('<div class="logo_graphic">');
@@ -727,10 +726,14 @@
 
       options.data = $(this).data('logo');
 
+      if (options.data === null) {
+        return;
+      }
+
       options.dom_element = logo_graphic;
       options.called_on = this;
 
-      var zoom = options.zoom || 0.3,
+      var zoom = options.zoom || 0.4,
         form = $('<form class="logo_form"><fieldset><label for="position">Column number</label>' +
           '<input type="text" name="position" class="logo_position"></input>' +
           '<button class="button logo_change">Go</button></fieldset>' +
