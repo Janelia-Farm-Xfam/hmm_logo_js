@@ -215,11 +215,6 @@
       }
 
       draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill);
-
-      //draw vertical line to indicate where the delete would occur
-      if (text > 0.1) {
-        draw_ticks(context, x + col_width, height - 45, -45 - height, fill);
-      }
     }
 
 
