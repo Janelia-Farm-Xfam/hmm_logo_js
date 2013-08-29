@@ -869,11 +869,15 @@
             col_data = logo.data.height_arr[col - 1].slice(0).reverse(),
             info_cols = Math.ceil(col_data.length / 5),
             i = 0,
-            j = 0;
+            j = 0,
+            height_header = 'Probability';
 
+          if (logo.data.height_calc && logo.data.height_calc === 'score') {
+            height_header = 'Score';
+          }
           //add the headers for each column.
           for (i = 0; i < info_cols; i++) {
-            header += '<th>Residue</th><th>Score</th>';
+            header += '<th>Residue</th><th>' + height_header + '</th>';
           }
 
 
