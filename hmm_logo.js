@@ -408,7 +408,7 @@
         top_pix_height = 0,
         bottom_pix_height = 0,
         top_height = Math.abs(this.data.max_height),
-        bottom_height = this.data.min_height_obs;
+        bottom_height = (isNaN(this.data.min_height_obs)) ? 0 : parseInt(this.data.min_height_obs, 10);
       if (!canvasSupport()) {
         canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
       }
@@ -461,7 +461,7 @@
         column_num = start,
         i = 0,
         top_height = Math.abs(this.data.max_height),
-        bottom_height = this.data.min_height_obs,
+        bottom_height = (isNaN(this.data.min_height_obs)) ? 0 : parseInt(this.data.min_height_obs, 10),
         total_height = top_height + Math.abs(bottom_height),
         top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height),
         //convert % to pixels
@@ -866,15 +866,20 @@
             // clone the column data before reversal or the column gets messed
             // up in the logo when zoom levels change. Also stops flip-flopping
             // of the order from ascending to descending.
-            col_data = logo.data.height_arr[col - 1].slice(0).reverse(),
-            info_cols = Math.ceil(col_data.length / 5),
+            col_data = [],
+            info_cols = 0,
             i = 0,
             j = 0,
             height_header = 'Probability';
 
           if (logo.data.height_calc && logo.data.height_calc === 'score') {
             height_header = 'Score';
+            col_data = logo.data.height_arr[col - 1].slice(0).reverse();
+          } else {
+            col_data = logo.data.probs_arr[col - 1].slice(0).reverse();
           }
+
+          info_cols = Math.ceil(col_data.length / 5);
           //add the headers for each column.
           for (i = 0; i < info_cols; i++) {
             header += '<th>Residue</th><th>' + height_header + '</th>';
