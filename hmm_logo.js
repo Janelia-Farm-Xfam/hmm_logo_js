@@ -21,12 +21,42 @@
     return canv_support;
   }
 
+  function Letter(letter, options) {
+    this.value = letter;
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.width = parseInt(options.width, 10);
+    this.height = parseInt(options.height, 10);
+    this.color = options.color;
+    this.fontSize = options.fontSize;
+
+    this.scaled = function () { };
+
+    this.draw = function (ext_ctx, target_height, target_width, x, y) {
+      var h_ratio = target_height / this.height,
+        w_ratio = target_width / this.width;
+      ext_ctx.transform(h_ratio, 0, 0, w_ratio, x, y);
+      ext_ctx.drawImage(this.canvas, 0, 0);
+      ext_ctx.setTransform(1, 0, 0, 1, 0, 0);
+    };
+
+    // initial setup of internal canvas
+    $(this.canvas).attr('height', this.height).attr('width', this.width);
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.font = "bold " + this.fontSize + "px Arial";
+    this.ctx.clearRect(0, 0, this.height, this.width);
+    this.ctx.fillStyle = this.color;
+    this.ctx.textAlign = "center";
+    this.ctx.fillText(this.value, this.width / 2, this.height);
+  }
+
   function HMMLogo(options) {
     options = options || {};
 
     this.column_width = options.column_width || 34;
     this.height = options.height || 300;
     this.data = options.data || null;
+    this.debug = options.debug || null;
     this.scale_height_enabled = options.height_toggle || null;
     if (options.zoom_buttons && options.zoom_buttons === 'disabled') {
       this.zoom_enabled = null;
@@ -88,6 +118,12 @@
     }
 
     this.canvas_width = 5000;
+
+    //build the letter canvases
+    this.letters = {};
+
+
+
 
     // this needs to be set to null here so that we can initialise it after
     // the render function has fired and the width determined.
@@ -365,6 +401,9 @@
             if (this.zoomed_column > 12) {
               var fontsize = parseInt(10 * zoom, 10);
               fontsize = (fontsize > 10) ? 10 : fontsize;
+              if (this.debug) {
+                this.render_with_rects(split_start, split_end, i, 1);
+              }
               this.render_with_text(split_start, split_end, i, fontsize);
             } else {
               this.render_with_rects(split_start, split_end, i);
@@ -496,7 +535,7 @@
                 x_pos = x + (this.zoomed_column / 2),
                 // fonts are scaled to fit into the column width
                 // formula is y = 0.0024 * col_width + 0.0405
-                x_scale = ((0.0024 * this.zoomed_column) + 0.0405).toFixed(2),
+                x_scale = ((0.0024 * this.zoomed_column) + 0.0205).toFixed(2),
                 letter_height = null;
 
               // we don't render anything with a value between 0 and 0.01. These
@@ -504,17 +543,26 @@
               // just squash them out.
               if (values[1] > 0.01) {
                 letter_height = parseFloat(values[1]) / this.data.max_height;
-                var y_pos = 254 - previous_height;
-                var glyph_height = 258 * letter_height;
+                var y_pos = 255 - previous_height;
+                var glyph_height = 255 * letter_height;
 
+                console.log([values[0], glyph_height, letter_height]);
                 // The positioning in IE is off, so we need to modify the y_pos when
                 // canvas is not supported and we are using VML instead.
                 if (!canvasSupport()) {
                   y_pos = y_pos + (glyph_height * (letter_height / 2));
                 }
+                var font_string = "bold ";
 
+                if (/S|G|C|U|Q/.test(values[0])) {
+                  font_string += 344;
+                } else {
+                  font_string += 350;
+                }
 
-                this.contexts[context_num].font = "bold 350px Arial";
+                font_string += "px Arial";
+
+                this.contexts[context_num].font = font_string;
                 this.contexts[context_num].textAlign = "center";
                 this.contexts[context_num].fillStyle = this.colors[values[0]];
                 this.contexts[context_num].transform(x_scale, 0, 0, letter_height, x_pos, y_pos);
@@ -579,7 +627,7 @@
       draw_column_number(this.contexts[opts.context_num], num_x, 10, this.zoomed_column, opts.column_num, opts.fontsize, opts.ralign);
     };
 
-    this.render_with_rects = function (start, end, context_num) {
+    this.render_with_rects = function (start, end, context_num, borders) {
       var x = 0,
         column_num = start,
         i = 0,
@@ -611,8 +659,13 @@
                 glyph_height = 256 * letter_height,
                 y_pos = 256 - previous_height - glyph_height;
 
-              this.contexts[context_num].fillStyle = this.colors[values[0]];
-              this.contexts[context_num].fillRect(x_pos, y_pos, this.zoomed_column, glyph_height);
+              if (borders) {
+                this.contexts[context_num].strokeStyle = this.colors[values[0]];
+                this.contexts[context_num].strokeRect(x_pos, y_pos, this.zoomed_column, glyph_height);
+              } else {
+                this.contexts[context_num].fillStyle = this.colors[values[0]];
+                this.contexts[context_num].fillRect(x_pos, y_pos, this.zoomed_column, glyph_height);
+              }
 
               previous_height = previous_height + glyph_height;
             }
