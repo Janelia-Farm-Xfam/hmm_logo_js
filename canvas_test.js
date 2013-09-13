@@ -23,12 +23,9 @@
       this.draw = function (ext_ctx, target_height, target_width, x, y) {
         var h_ratio = target_height / this.height,
           w_ratio = target_width / this.width;
-        ext_ctx.transform(h_ratio, 0, 0, w_ratio, x, y);
+        ext_ctx.transform(w_ratio, 0, 0, h_ratio, x, y);
         ext_ctx.drawImage(this.canvas, 0, 0);
         ext_ctx.setTransform(1, 0, 0, 1, 0, 0);
-        if (this.value === 'W') {
-          ext_ctx.drawImage(this.canvas, 100, 1000);
-        }
       };
 
       // initial setup of internal canvas
@@ -45,6 +42,9 @@
       ctx = canvas[0].getContext('2d'),
       i = 0,
       l = 0,
+      x = 0,
+      height = 10,
+      letter_count = 0,
       letter_objs = {},
       letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
@@ -53,7 +53,7 @@
       if (this === 'W') {
         options.color = '#ff0000';
         options.width = 130;
-        options.height = 130;
+        options.height = 100;
       }
       letter_objs[this] = new Letter(this, options);
     });
@@ -64,11 +64,9 @@
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, 10000, 500);
 
-    var height = 10,
-      letter_count = 0;
     for (i = 0; i < 76; i++) {
-      var x = i * 60;
-      letter_objs[letters[letter_count]].draw(ctx, 30, height, x, 10);
+      x = i * 60;
+      letter_objs[letters[letter_count]].draw(ctx, height, 30, x, 10);
       height += 5;
       letter_count++;
       if (letter_count > 25) {
