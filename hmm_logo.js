@@ -22,20 +22,32 @@
   }
 
   function Letter(letter, options) {
+
+    options = options || {};
     this.value = letter;
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d');
-    this.width = parseInt(options.width, 10);
-    this.height = parseInt(options.height, 10);
-    this.color = options.color;
-    this.fontSize = options.fontSize;
+    this.width = parseInt(options.width, 10) || 100;
+
+    //W is 30% wider than the other letters, so need to make sure
+    //it gets modified accordingly.
+    if (this.value === 'W') {
+      this.width += (this.width * 30) / 100;
+    }
+
+    this.height = parseInt(options.height, 10) || 100;
+    this.color = options.color || '#000000';
+    // if the height and width are changed from the default, then
+    // this will also need to be changed as it cant be calculated
+    // dynamically.
+    this.fontSize = options.fontSize || 138;
 
     this.scaled = function () { };
 
     this.draw = function (ext_ctx, target_height, target_width, x, y) {
       var h_ratio = target_height / this.height,
         w_ratio = target_width / this.width;
-      ext_ctx.transform(h_ratio, 0, 0, w_ratio, x, y);
+      ext_ctx.transform(w_ratio, 0, 0, h_ratio, x, y);
       ext_ctx.drawImage(this.canvas, 0, 0);
       ext_ctx.setTransform(1, 0, 0, 1, 0, 0);
     };
@@ -121,6 +133,13 @@
 
     //build the letter canvases
     this.letters = {};
+    var letter = null;
+
+    for (letter in this.colors) {
+      var loptions = {color: this.colors[letter]};
+      this.letters[letter] = new Letter(letter, loptions);
+    }
+    console.log(this.letters);
 
 
 
@@ -533,9 +552,6 @@
               var letter = column[j],
                 values = letter.split(':', 2),
                 x_pos = x + (this.zoomed_column / 2),
-                // fonts are scaled to fit into the column width
-                // formula is y = 0.0024 * col_width + 0.0405
-                x_scale = ((0.0024 * this.zoomed_column) + 0.0205).toFixed(2),
                 letter_height = null;
 
               // we don't render anything with a value between 0 and 0.01. These
@@ -546,28 +562,14 @@
                 var y_pos = 255 - previous_height;
                 var glyph_height = 255 * letter_height;
 
-                console.log([values[0], glyph_height, letter_height]);
                 // The positioning in IE is off, so we need to modify the y_pos when
                 // canvas is not supported and we are using VML instead.
                 if (!canvasSupport()) {
                   y_pos = y_pos + (glyph_height * (letter_height / 2));
                 }
-                var font_string = "bold ";
 
-                if (/S|G|C|U|Q/.test(values[0])) {
-                  font_string += 344;
-                } else {
-                  font_string += 350;
-                }
+                this.letters[letter[0]].draw(this.contexts[context_num], glyph_height, this.zoomed_column, x, y_pos - glyph_height);
 
-                font_string += "px Arial";
-
-                this.contexts[context_num].font = font_string;
-                this.contexts[context_num].textAlign = "center";
-                this.contexts[context_num].fillStyle = this.colors[values[0]];
-                this.contexts[context_num].transform(x_scale, 0, 0, letter_height, x_pos, y_pos);
-                this.contexts[context_num].fillText(values[0], 0, 0);
-                this.contexts[context_num].setTransform(1, 0, 0, 1, 0, 0);
                 previous_height = previous_height + glyph_height;
               }
             }

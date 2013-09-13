@@ -14,6 +14,14 @@
       this.canvas = document.createElement('canvas');
       this.ctx = this.canvas.getContext('2d');
       this.width = parseInt(options.width, 10) || 100;
+
+      //W is 30% wider than the other letters, so need to make sure
+      //it gets modified accordingly.
+      if (this.value === 'W') {
+        this.width += (this.width * 30) / 100;
+        console.log(this.width);
+      }
+
       this.height = parseInt(options.height, 10) || 100;
       this.color = options.color || '#000000';
       this.fontSize = options.fontSize || 138;
@@ -52,9 +60,8 @@
       var options = {};
       if (this === 'W') {
         options.color = '#ff0000';
-        options.width = 130;
-        options.height = 100;
       }
+
       letter_objs[this] = new Letter(this, options);
     });
 
