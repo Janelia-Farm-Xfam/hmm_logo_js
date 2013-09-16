@@ -974,7 +974,7 @@
 
       $(document).bind(this.attr('id') + ".scrolledTo", function (e, left, top, zoom) {
         var hmm_logo = logo;
-        logo.render({target: left});
+        hmm_logo.render({target: left});
       });
 
       $(document).keydown(function (e) {
