@@ -25,8 +25,6 @@
 
     options = options || {};
     this.value = letter;
-    this.canvas = document.createElement('canvas');
-    this.ctx = this.canvas.getContext('2d');
     this.width = parseInt(options.width, 10) || 100;
 
     //W is 30% wider than the other letters, so need to make sure
@@ -46,20 +44,20 @@
 
     this.draw = function (ext_ctx, target_height, target_width, x, y) {
       var h_ratio = target_height / this.height,
-        w_ratio = target_width / this.width;
+        w_ratio = target_width / this.width,
+        prev_font = ext_ctx.font;
       ext_ctx.transform(w_ratio, 0, 0, h_ratio, x, y);
-      ext_ctx.drawImage(this.canvas, 0, 0);
+      ext_ctx.fillStyle = this.color;
+      ext_ctx.textAlign = "center";
+      ext_ctx.font = "bold " + this.fontSize + "px Arial";
+
+      ext_ctx.fillText(this.value, 0, 0);
+      //restore the canvas settings
       ext_ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ext_ctx.fillStyle = '#000000';
+      ext_ctx.font = prev_font;
     };
 
-    // initial setup of internal canvas
-    $(this.canvas).attr('height', this.height).attr('width', this.width);
-    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-    this.ctx.font = "bold " + this.fontSize + "px Arial";
-    this.ctx.clearRect(0, 0, this.height, this.width);
-    this.ctx.fillStyle = this.color;
-    this.ctx.textAlign = "center";
-    this.ctx.fillText(this.value, this.width / 2, this.height);
   }
 
   function HMMLogo(options) {
@@ -568,7 +566,7 @@
                   y_pos = y_pos + (glyph_height * (letter_height / 2));
                 }
 
-                this.letters[letter[0]].draw(this.contexts[context_num], glyph_height, this.zoomed_column, x, y_pos - glyph_height);
+                this.letters[letter[0]].draw(this.contexts[context_num], glyph_height, this.zoomed_column, x_pos, y_pos);
 
                 previous_height = previous_height + glyph_height;
               }
