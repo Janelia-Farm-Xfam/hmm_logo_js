@@ -137,10 +137,6 @@
       var loptions = {color: this.colors[letter]};
       this.letters[letter] = new Letter(letter, loptions);
     }
-    console.log(this.letters);
-
-
-
 
     // this needs to be set to null here so that we can initialise it after
     // the render function has fired and the width determined.
@@ -935,7 +931,13 @@
           info_cols = Math.ceil(col_data.length / 5);
           //add the headers for each column.
           for (i = 0; i < info_cols; i++) {
-            header += '<th>Residue</th><th>' + height_header + '</th>';
+            // using the i < info_cols - 1 check to make sure the last column doesn't
+            // get marked with the odd class so we don't get a border on the edge of the table.
+            if (info_cols > 1 && i < (info_cols - 1)) {
+              header += '<th>Residue</th><th class="odd">' + height_header + '</th>';
+            } else {
+              header += '<th>Residue</th><th>' + height_header + '</th>';
+            }
           }
 
 
@@ -948,7 +950,13 @@
             j = i;
             while (col_data[j]) {
               var values = col_data[j].split(':', 2);
-              tbody += '<td>' + values[0] + '</td><td>' + values[1] + '</td>';
+              // using the j < 15 check to make sure the last column doesn't get marked
+              // with the odd class so we don't get a border on the edge of the table.
+              if (info_cols > 1  &&  j < 15) {
+                tbody += '<td>' + values[0] + '</td><td class="odd">' + values[1] + '</td>';
+              } else {
+                tbody += '<td>' + values[0] + '</td><td>' + values[1] + '</td>';
+              }
 
               j += 5;
             }
@@ -958,7 +966,9 @@
 
           info_tab.append($(tbody));
 
-          $(options.column_info).empty().append(info_tab);
+          $(options.column_info).empty()
+            .append($('<p> Column:' + col  + '</p>'))
+            .append(info_tab).show();
         });
       }
 
