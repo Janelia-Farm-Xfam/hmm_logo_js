@@ -22,7 +22,6 @@
   }
 
   function Letter(letter, options) {
-
     options = options || {};
     this.value = letter;
     this.width = parseInt(options.width, 10) || 100;
@@ -536,7 +535,8 @@
           this.contexts[context_num].fillStyle = '#cccccc';
           this.contexts[context_num].fillRect(x, 10, this.zoomed_column, this.height - 40);
         } else {
-          var column = this.data.height_arr[i - 1];
+          var column = this.data.height_arr[i - 1],
+            col_positions = [];
           if (column) {
             var previous_height = 0,
               letters = column.length,
@@ -562,9 +562,16 @@
                   y_pos = y_pos + (glyph_height * (letter_height / 2));
                 }
 
-                this.letters[letter[0]].draw(this.contexts[context_num], glyph_height, this.zoomed_column, x_pos, y_pos);
-
+                col_positions[j] = [glyph_height, this.zoomed_column, x_pos, y_pos];
                 previous_height = previous_height + glyph_height;
+              }
+            }
+
+            // render the letters in reverse order so that the larger letters on the top
+            // don't clobber the smaller letters below them.
+            for (j = letters; j >= 0; j--) {
+              if (col_positions[j]) {
+                this.letters[column[j][0]].draw(this.contexts[context_num], col_positions[j][0], col_positions[j][1], col_positions[j][2], col_positions[j][3]);
               }
             }
           }
