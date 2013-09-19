@@ -500,7 +500,7 @@
       context.rotate(-Math.PI / 2);
       context.textAlign = "center";
       context.font = "normal 12px Arial";
-      context.fillText("Information Content", 1, 0);
+      context.fillText("Information Content (bits)", 1, 0);
       context.restore();
 
       // draw the insert row labels
