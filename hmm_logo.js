@@ -960,9 +960,9 @@
               // using the j < 15 check to make sure the last column doesn't get marked
               // with the odd class so we don't get a border on the edge of the table.
               if (info_cols > 1  &&  j < 15) {
-                tbody += '<td class="' + logo.alphabet + '_' + values[0] + '">' + values[0] + '</td><td class="odd">' + values[1] + '</td>';
+                tbody += '<td class="' + logo.alphabet + '_' + values[0] + '"><div></div>' + values[0] + '</td><td class="odd">' + values[1] + '</td>';
               } else {
-                tbody += '<td class="' + logo.alphabet + '_' + values[0] + '">' + values[0] + '</td><td>' + values[1] + '</td>';
+                tbody += '<td class="' + logo.alphabet + '_' + values[0] + '"><div></div>' + values[0] + '</td><td>' + values[1] + '</td>';
               }
 
               j += 5;
