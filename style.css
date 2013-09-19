@@ -66,3 +66,94 @@
   z-index: 5;
 }
 
+.aa_A {
+  border-left: 3px solid #FF9966;
+}
+.aa_B {
+  border-left: 3px solid #fff;
+}
+.aa_C {
+  border-left: 3px solid #009999;
+}
+.aa_D {
+  border-left: 3px solid #FF0000;
+}
+.aa_E {
+  border-left: 3px solid #CC0033;
+}
+.aa_F {
+  border-left: 3px solid #00FF00;
+}
+.aa_G {
+  border-left: 3px solid #f2f20c;
+}
+.aa_H {
+  border-left: 3px solid #660033;
+}
+.aa_I {
+  border-left: 3px solid #CC9933;
+}
+.aa_J {
+  border-left: 3px solid #fff;
+}
+.aa_K {
+  border-left: 3px solid #663300;
+}
+.aa_L {
+  border-left: 3px solid #FF9933;
+}
+.aa_M {
+  border-left: 3px solid #CC99CC;
+}
+.aa_N {
+  border-left: 3px solid #336666;
+}
+.aa_O {
+  border-left: 3px solid #fff;
+}
+.aa_P {
+  border-left: 3px solid #0099FF;
+}
+.aa_Q {
+  border-left: 3px solid #6666CC;
+}
+.aa_R {
+  border-left: 3px solid #990000;
+}
+.aa_S {
+  border-left: 3px solid #0000FF;
+}
+.aa_T {
+  border-left: 3px solid #00FFFF;
+}
+.aa_U {
+  border-left: 3px solid #fff;
+}
+.aa_V {
+  border-left: 3px solid #FFCC33;
+}
+.aa_W {
+  border-left: 3px solid #66CC66;
+}
+.aa_X {
+  border-left: 3px solid #fff;
+}
+.aa_Y {
+  border-left: 3px solid #006600;
+}
+.aa_Z {
+  border-left: 3px solid #fff;
+}
+
+.dna_A {
+  border-left: 3px solid #cbf751;
+}
+.dna_C {
+  border-left: 3px solid #5ec0cc;
+}
+.dna_G {
+  border-left: 3px solid #ffdf59;
+}
+.dna_T, .dna_U {
+  border-left: 3px solid #b51f16;
+}

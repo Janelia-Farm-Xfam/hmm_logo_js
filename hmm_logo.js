@@ -570,7 +570,7 @@
             // render the letters in reverse order so that the larger letters on the top
             // don't clobber the smaller letters below them.
             for (j = letters; j >= 0; j--) {
-              if (col_positions[j]) {
+              if (col_positions[j] && this.letters[column[j][0]]) {
                 this.letters[column[j][0]].draw(this.contexts[context_num], col_positions[j][0], col_positions[j][1], col_positions[j][2], col_positions[j][3]);
               }
             }
@@ -960,9 +960,9 @@
               // using the j < 15 check to make sure the last column doesn't get marked
               // with the odd class so we don't get a border on the edge of the table.
               if (info_cols > 1  &&  j < 15) {
-                tbody += '<td>' + values[0] + '</td><td class="odd">' + values[1] + '</td>';
+                tbody += '<td class="' + logo.alphabet + '_' + values[0] + '">' + values[0] + '</td><td class="odd">' + values[1] + '</td>';
               } else {
-                tbody += '<td>' + values[0] + '</td><td>' + values[1] + '</td>';
+                tbody += '<td class="' + logo.alphabet + '_' + values[0] + '">' + values[0] + '</td><td>' + values[1] + '</td>';
               }
 
               j += 5;
