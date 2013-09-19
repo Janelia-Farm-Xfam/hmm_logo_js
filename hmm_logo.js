@@ -228,7 +228,7 @@
       draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill);
 
       //draw vertical line to indicate where the insert would occur
-      if (text > 0.1) {
+      if (text > 0.03) {
         draw_ticks(context, x + col_width, height - 30, -30 - height, fill);
       }
     }
