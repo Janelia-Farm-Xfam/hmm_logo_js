@@ -454,7 +454,7 @@
 
     this.render_y_axis_label = function () {
       //attach a canvas for the y-axis
-      $(this.dom_element).parent().before('<canvas class="logo_yaxis" height="300" width="40"></canvas>');
+      $(this.dom_element).parent().before('<canvas class="logo_yaxis" height="300" width="55"></canvas>');
       var canvas = $(this.called_on).find('.logo_yaxis'),
         top_pix_height = 0,
         bottom_pix_height = 0,
@@ -466,15 +466,15 @@
       var context = canvas[0].getContext('2d');
       //draw min/max tick marks
       context.beginPath();
-      context.moveTo(40, 1);
-      context.lineTo(30, 1);
+      context.moveTo(55, 1);
+      context.lineTo(40, 1);
 
-      context.moveTo(40, 256);
-      context.lineTo(30, 256);
+      context.moveTo(55, 256);
+      context.lineTo(40, 256);
 
 
-      context.moveTo(40, (256 / 2));
-      context.lineTo(30, (256 / 2));
+      context.moveTo(55, (256 / 2));
+      context.lineTo(40, (256 / 2));
       context.lineWidth = 1;
       context.strokeStyle = "#666666";
       context.stroke();
@@ -486,22 +486,27 @@
 
       // draw the max label
       context.textBaseline = "top";
-      context.fillText(this.data.max_height.toFixed(1), 28, 0);
+      context.fillText(this.data.max_height.toFixed(1), 38, 0);
       context.textBaseline = "middle";
 
       // draw the midpoint labels
-      context.fillText(parseFloat(this.data.max_height / 2).toFixed(1), 28, (256 / 2));
+      context.fillText(parseFloat(this.data.max_height / 2).toFixed(1), 38, (256 / 2));
       // draw the min label
-      context.fillText('0', 28, 256);
+      context.fillText('0', 38, 256);
 
       // draw the axis label
       context.save();
-      context.translate(5, this.height / 2);
+      context.translate(5, this.height / 2 - 20);
       context.rotate(-Math.PI / 2);
       context.textAlign = "center";
       context.font = "normal 12px Arial";
       context.fillText("Information Content", 1, 0);
       context.restore();
+
+      // draw the insert row labels
+      context.fillText('occupancy', 55, 263);
+      context.fillText('ins. prob.', 50, 280);
+      context.fillText('ins. len.', 46, 296);
     };
 
     this.render_x_axis_label();

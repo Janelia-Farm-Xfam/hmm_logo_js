@@ -5,14 +5,14 @@
 }
 
 .logo form {
-  margin: 0.3em 40px;
+  margin: 0.3em 55px;
 }
 
 .logo_container {
   position:relative;
   height: 300px;
   overflow:hidden;
-  margin-left:40px;
+  margin-left:55px;
   border:1px solid #999;
 }
 
