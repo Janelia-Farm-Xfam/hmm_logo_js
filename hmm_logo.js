@@ -463,7 +463,8 @@
       if (!canvasSupport()) {
         canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
       }
-      var context = canvas[0].getContext('2d');
+      var context = canvas[0].getContext('2d'),
+        axis_label = "Information Content (bits)";
       //draw min/max tick marks
       context.beginPath();
       context.moveTo(55, 1);
@@ -495,12 +496,16 @@
       context.fillText('0', 38, 256);
 
       // draw the axis label
+      if (this.data.height_calc === 'score') {
+        axis_label = "Score (bits)";
+      }
+
       context.save();
       context.translate(5, this.height / 2 - 20);
       context.rotate(-Math.PI / 2);
       context.textAlign = "center";
       context.font = "normal 12px Arial";
-      context.fillText("Information Content (bits)", 1, 0);
+      context.fillText(axis_label, 1, 0);
       context.restore();
 
       // draw the insert row labels
