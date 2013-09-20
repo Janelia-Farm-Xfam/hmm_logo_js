@@ -253,12 +253,12 @@
         fill     = '#ffffff',
         textfill = '#555555';
 
-      if (text > 0.25) {
+      if (text < 0.75) {
         fill     = '#2171b5';
         textfill = '#ffffff';
-      } else if (text > 0.15) {
+      } else if (text < 0.85) {
         fill = '#6baed6';
-      } else if (text > 0.05) {
+      } else if (text < 0.95) {
         fill = '#bdd7e7';
       }
 
@@ -613,8 +613,8 @@
           });
         }
 
-        draw_delete_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.delete_probs[i - 1] / 100, fontsize);
-        draw_insert_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.insert_probs[i - 1] / 100, fontsize);
+        draw_delete_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.delete_probs[i - 1], fontsize);
+        draw_insert_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.insert_probs[i - 1], fontsize);
         draw_insert_length(this.contexts[context_num], x, this.height - 5, this.zoomed_column, this.data.insert_lengths[i - 1], fontsize);
 
         x += this.zoomed_column;
