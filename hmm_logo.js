@@ -487,7 +487,7 @@
 
       // draw the max label
       context.textBaseline = "top";
-      context.fillText(this.data.max_height.toFixed(1), 38, 0);
+      context.fillText(parseFloat(this.data.max_height).toFixed(1), 38, 0);
       context.textBaseline = "middle";
 
       // draw the midpoint labels
