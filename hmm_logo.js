@@ -836,7 +836,8 @@
         form = $('<form class="logo_form"><fieldset><label for="position">Column number</label>' +
           '<input type="text" name="position" class="logo_position"></input>' +
           '<button class="button logo_change">Go</button></fieldset>' +
-          '</form>');
+          '</form>'),
+        controls = $('<div class="logo_controls">');
 
       logo = new HMMLogo(options);
       logo.render(options);
@@ -845,13 +846,14 @@
        * as letters will fall off the top.
        */
       if (logo.scale_height_enabled && (logo.data.max_height_obs < logo.data.max_height_theory)) {
-        form.append('<button class="logo_scale button">Toggle Scale</button><br/>');
+        controls.append('<button class="logo_scale button">Toggle Scale</button>');
       }
 
       if (logo.zoom_enabled) {
-        form.append('<button class="logo_zoomout button">-</button>' +
+        controls.append('<button class="logo_zoomout button">-</button>' +
           '<button class="logo_zoomin button">+</button>');
       }
+      form.append(controls);
       $(this).append(form);
 
 
@@ -980,11 +982,12 @@
             tbody += '</tr>';
           }
 
+          console.log(logo);
 
           info_tab.append($(tbody));
 
           $(options.column_info).empty()
-            .append($('<p> Column:' + col  + '</p>'))
+            .append($('<p> Column:' + col  + '</p><hr/><p>Occupancy: ' + logo.data.delete_probs[col - 1] + '</p><p>Insert Probability: ' + logo.data.insert_probs[col - 1] + '</p><p>Insert Length: ' + logo.data.insert_lengths[col - 1] + '</p><hr/>'))
             .append(info_tab).show();
         });
       }
