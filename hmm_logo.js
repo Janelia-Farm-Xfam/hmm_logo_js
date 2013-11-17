@@ -454,7 +454,12 @@
     };
 
     this.render_x_axis_label = function () {
-      $(this.dom_element).parent().before('<div class="logo_xaxis" class="centered" style="margin-left:40px"><p class="xaxis_text" style="width:10em;margin:1em auto">Model Position</p></div>');
+      var label = "Model Position";
+      if (this.display_ali_coords) {
+        label = "Alignment Position";
+      }
+      $(this.called_on).find('.logo_xaxis').remove();
+      $(this.called_on).prepend('<div class="logo_xaxis" class="centered" style="margin-left:40px"><p class="xaxis_text" style="width:10em;margin:1em auto">' + label + '</p></div>');
     };
 
     this.render_y_axis_label = function () {
@@ -773,6 +778,7 @@
       } else {
         this.display_ali_coords = 1;
       }
+      this.render_x_axis_label();
 
       // reset the rendered counter so that each section will re-render
       // with the new heights
