@@ -982,12 +982,10 @@
             tbody += '</tr>';
           }
 
-          console.log(logo);
-
           info_tab.append($(tbody));
 
           $(options.column_info).empty()
-            .append($('<p> Column:' + col  + '</p><hr/><p>Occupancy: ' + logo.data.delete_probs[col - 1] + '</p><p>Insert Probability: ' + logo.data.insert_probs[col - 1] + '</p><p>Insert Length: ' + logo.data.insert_lengths[col - 1] + '</p><hr/>'))
+            .append($('<p> Column:' + col  + '</p><div><p>Occupancy: ' + logo.data.delete_probs[col - 1] + '</p><p>Insert Probability: ' + logo.data.insert_probs[col - 1] + '</p><p>Insert Length: ' + logo.data.insert_lengths[col - 1] + '</p></div>'))
             .append(info_tab).show();
         });
       }
