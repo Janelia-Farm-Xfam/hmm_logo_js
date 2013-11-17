@@ -33,6 +33,7 @@
     }
 
     this.height = parseInt(options.height, 10) || 100;
+
     this.color = options.color || '#000000';
     // if the height and width are changed from the default, then
     // this will also need to be changed as it cant be calculated
@@ -72,6 +73,10 @@
     } else {
       this.zoom_enabled = true;
     }
+
+    // never show the alignment coordinates by default as that would get
+    // really confusing.
+    this.display_ali_coords = 0;
 
     this.alphabet = options.data.alphabet || 'dna';
     this.dom_element = options.dom_element || $('body');
@@ -520,6 +525,7 @@
     this.render_with_text = function (start, end, context_num, fontsize) {
       var x = 0,
         column_num = start,
+        column_label = null,
         i = 0,
         top_height = Math.abs(this.data.max_height),
         bottom_height = (isNaN(this.data.min_height_obs)) ? 0 : parseInt(this.data.min_height_obs, 10),
@@ -594,13 +600,21 @@
         // draw delete probability ticks
         draw_ticks(this.contexts[context_num], x, this.height - 45, 5);
 
+        // if ali_coordinates exist and toggle is set then display the
+        // alignment coordinates and not the model coordinates.
+        if (this.display_ali_coords) {
+          column_label = this.data.ali_coords[i - 1];
+        } else {
+          column_label = column_num;
+        }
+
         if (this.zoom < 0.7) {
           if (i % 5 === 0) {
             this.draw_column_divider({
               context_num : context_num,
               x : x,
               fontsize: 10,
-              column_num: column_num,
+              column_num: column_label,
               ralign: true
             });
           }
@@ -609,7 +623,7 @@
             context_num : context_num,
             x : x,
             fontsize: fontsize,
-            column_num: column_num
+            column_num: column_label
           });
         }
 
@@ -643,6 +657,7 @@
     this.render_with_rects = function (start, end, context_num, borders) {
       var x = 0,
         column_num = start,
+        column_label = null,
         i = 0,
         top_height = Math.abs(this.data.max_height),
         bottom_height = Math.abs(this.data.min_height_obs),
@@ -697,8 +712,16 @@
           draw_ticks(this.contexts[context_num], x + this.zoomed_column, this.height - 30, parseFloat(this.height), '#dddddd');
           // draw top ticks
           draw_ticks(this.contexts[context_num], x + this.zoomed_column, 0, 5);
+
+          // if ali_coordinates exist and toggle is set then display the
+          // alignment coordinates and not the model coordinates.
+          if (this.display_ali_coords) {
+            column_label = this.data.ali_coords[i - 1];
+          } else {
+            column_label = column_num;
+          }
           // draw column numbers
-          draw_column_number(this.contexts[context_num], x - 2,  10, this.zoomed_column, column_num, 10, true);
+          draw_column_number(this.contexts[context_num], x - 2,  10, this.zoomed_column, column_label, 10, true);
         }
 
 
@@ -725,12 +748,35 @@
       } else {
         this.data.max_height = this.data.max_height_obs;
       }
-      // reset the redered counter so that each section will re-render
+      // reset the rendered counter so that each section will re-render
       // with the new heights
       this.rendered = [];
       //update the y-axis
       $(this.called_on).find('.logo_yaxis').remove();
       this.render_y_axis_label();
+
+      // re-flow and re-render the content
+      this.scrollme.reflow();
+      //scroll off by one to force a render of the canvas.
+      this.scrollToColumn(col_total + 1);
+      //scroll back to the location we started at.
+      this.scrollToColumn(col_total);
+    };
+
+    this.toggle_ali_coords = function () {
+      // work out the current column we are on so we can return there
+      var col_total = this.current_column();
+
+      // toggle the max height
+      if (this.display_ali_coords === 1) {
+        this.display_ali_coords = 0;
+      } else {
+        this.display_ali_coords = 1;
+      }
+
+      // reset the rendered counter so that each section will re-render
+      // with the new heights
+      this.rendered = [];
 
       // re-flow and re-render the content
       this.scrollme.reflow();
@@ -842,6 +888,11 @@
       logo = new HMMLogo(options);
       logo.render(options);
 
+      if (logo.zoom_enabled) {
+        controls.append('<button class="logo_zoomout button">-</button>' +
+          '<button class="logo_zoomin button">+</button>');
+      }
+
       /* we don't want to toggle if the max height_obs is greater than max theoretical
        * as letters will fall off the top.
        */
@@ -849,10 +900,10 @@
         controls.append('<button class="logo_scale button">Toggle Scale</button>');
       }
 
-      if (logo.zoom_enabled) {
-        controls.append('<button class="logo_zoomout button">-</button>' +
-          '<button class="logo_zoomin button">+</button>');
+      if (logo.data.ali_coords) {
+        controls.append('<button class="logo_ali_coords button">Toggle Alignment Coordinates</button>');
       }
+
       form.append(controls);
       $(this).append(form);
 
@@ -883,6 +934,12 @@
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.toggle_scale();
+      });
+
+      $(this).find('.logo_ali_coords').bind('click', function (e) {
+        e.preventDefault();
+        var hmm_logo = logo;
+        hmm_logo.toggle_ali_coords();
       });
 
       $(this).find('.logo_position').bind('change', function () {
