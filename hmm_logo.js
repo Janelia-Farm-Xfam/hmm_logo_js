@@ -177,11 +177,11 @@
 
       fill = "#ffffff";
       // draw delete odds
-      if (del_odds > 0.25) {
+      if (del_odds < 0.75) {
         fill = '#2171b5';
-      } else if (del_odds > 0.15) {
+      } else if (del_odds < 0.85) {
         fill = '#6baed6';
-      } else if (del_odds > 0.05) {
+      } else if (del_odds < 0.95) {
         fill = '#bdd7e7';
       }
       context.fillStyle = fill;
@@ -731,7 +731,15 @@
 
 
         // draw insert probabilities/lengths
-        draw_small_insert(this.contexts[context_num], x, this.height - 42, this.zoomed_column, this.data.insert_probs[i - 1] / 100, this.data.insert_lengths[i - 1], this.data.delete_probs[i - 1] / 100);
+        draw_small_insert(
+          this.contexts[context_num],
+          x,
+          this.height - 42,
+          this.zoomed_column,
+          this.data.insert_probs[i - 1],
+          this.data.insert_lengths[i - 1],
+          this.data.delete_probs[i - 1]
+        );
 
         // draw other dividers
         draw_border(this.contexts[context_num], this.height - 45, this.total_width);
