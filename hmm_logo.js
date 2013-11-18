@@ -76,7 +76,7 @@
 
     // never show the alignment coordinates by default as that would get
     // really confusing.
-    this.display_ali_coords = 0;
+    this.display_ali_map = 0;
 
     this.alphabet = options.data.alphabet || 'dna';
     this.dom_element = options.dom_element || $('body');
@@ -455,8 +455,8 @@
 
     this.render_x_axis_label = function () {
       var label = "Model Position";
-      if (this.display_ali_coords) {
-        label = "Alignment Position";
+      if (this.display_ali_map) {
+        label = "Alignment Column";
       }
       $(this.called_on).find('.logo_xaxis').remove();
       $(this.called_on).prepend('<div class="logo_xaxis" class="centered" style="margin-left:40px"><p class="xaxis_text" style="width:10em;margin:1em auto">' + label + '</p></div>');
@@ -607,8 +607,8 @@
 
         // if ali_coordinates exist and toggle is set then display the
         // alignment coordinates and not the model coordinates.
-        if (this.display_ali_coords) {
-          column_label = this.data.ali_coords[i - 1];
+        if (this.display_ali_map) {
+          column_label = this.data.ali_map[i - 1];
         } else {
           column_label = column_num;
         }
@@ -720,8 +720,8 @@
 
           // if ali_coordinates exist and toggle is set then display the
           // alignment coordinates and not the model coordinates.
-          if (this.display_ali_coords) {
-            column_label = this.data.ali_coords[i - 1];
+          if (this.display_ali_map) {
+            column_label = this.data.ali_map[i - 1];
           } else {
             column_label = column_num;
           }
@@ -768,15 +768,15 @@
       this.scrollToColumn(col_total);
     };
 
-    this.toggle_ali_coords = function () {
+    this.toggle_ali_map = function () {
       // work out the current column we are on so we can return there
       var col_total = this.current_column();
 
       // toggle the max height
-      if (this.display_ali_coords === 1) {
-        this.display_ali_coords = 0;
+      if (this.display_ali_map === 1) {
+        this.display_ali_map = 0;
       } else {
-        this.display_ali_coords = 1;
+        this.display_ali_map = 1;
       }
       this.render_x_axis_label();
 
@@ -906,8 +906,8 @@
         controls.append('<button class="logo_scale button">Toggle Scale</button>');
       }
 
-      if (logo.data.ali_coords) {
-        controls.append('<button class="logo_ali_coords button">Toggle Alignment Coordinates</button>');
+      if (logo.data.ali_map) {
+        controls.append('<button class="logo_ali_map button">Toggle Alignment Coordinates</button>');
       }
 
       form.append(controls);
@@ -942,10 +942,10 @@
         hmm_logo.toggle_scale();
       });
 
-      $(this).find('.logo_ali_coords').bind('click', function (e) {
+      $(this).find('.logo_ali_map').bind('click', function (e) {
         e.preventDefault();
         var hmm_logo = logo;
-        hmm_logo.toggle_ali_coords();
+        hmm_logo.toggle_ali_map();
       });
 
       $(this).find('.logo_position').bind('change', function () {
