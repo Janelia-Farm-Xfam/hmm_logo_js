@@ -161,7 +161,7 @@
         fill = '#fdcc8a';
       }
       context.fillStyle = fill;
-      context.fillRect(x, y + 12, col_width, 10);
+      context.fillRect(x, y + 15, col_width, 10);
 
       fill = "#ffffff";
       // draw insert length
@@ -173,7 +173,7 @@
         fill = '#fdcc8a';
       }
       context.fillStyle = fill;
-      context.fillRect(x, y + 24, col_width, 10);
+      context.fillRect(x, y + 30, col_width, 10);
 
       fill = "#ffffff";
       // draw delete odds
