@@ -86,6 +86,16 @@
     this.zoom = parseFloat(options.zoom) || 0.4;
     this.default_zoom = this.zoom;
 
+    // turn off the insert rows if the hmm used the observed or weighted processing flags.
+    if (this.data.processing && /^observed|weighted/.test(this.data.processing)) {
+      this.show_inserts = 0;
+      this.info_content_height = 286;
+    } else {
+      this.show_inserts = 1;
+      this.info_content_height = 256;
+    }
+
+
     if (options.scaled_max) {
       this.data.max_height = options.data.max_height_obs || this.data.max_height || 2;
     } else {
@@ -151,29 +161,33 @@
     this.rendered = [];
     this.previous_zoom = 0;
 
-    function draw_small_insert(context, x, y, col_width, in_odds, in_length, del_odds) {
+    function draw_small_insert(context, x, y, col_width, in_odds, in_length, del_odds, show_inserts) {
       var fill = "#ffffff";
-      if (in_odds > 0.1) {
-        fill = '#d7301f';
-      } else if (in_odds > 0.05) {
-        fill = '#fc8d59';
-      } else if (in_odds > 0.03) {
-        fill = '#fdcc8a';
-      }
-      context.fillStyle = fill;
-      context.fillRect(x, y + 15, col_width, 10);
+      if (show_inserts) {
+        if (in_odds > 0.1) {
+          fill = '#d7301f';
+        } else if (in_odds > 0.05) {
+          fill = '#fc8d59';
+        } else if (in_odds > 0.03) {
+          fill = '#fdcc8a';
+        }
+        context.fillStyle = fill;
+        context.fillRect(x, y + 15, col_width, 10);
 
-      fill = "#ffffff";
-      // draw insert length
-      if (in_length > 9) {
-        fill = '#d7301f';
-      } else if (in_length > 7) {
-        fill = '#fc8d59';
-      } else if (in_length > 4) {
-        fill = '#fdcc8a';
+        fill = "#ffffff";
+        // draw insert length
+        if (in_length > 9) {
+          fill = '#d7301f';
+        } else if (in_length > 7) {
+          fill = '#fc8d59';
+        } else if (in_length > 4) {
+          fill = '#fdcc8a';
+        }
+        context.fillStyle = fill;
+        context.fillRect(x, y + 30, col_width, 10);
+      } else {
+        y  = y + 30;
       }
-      context.fillStyle = fill;
-      context.fillRect(x, y + 30, col_width, 10);
 
       fill = "#ffffff";
       // draw delete odds
@@ -253,10 +267,16 @@
       draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill);
     }
 
-    function draw_delete_odds(context, x, height, col_width, text, fontsize) {
-      var y        = height - 35,
+    function draw_delete_odds(context, x, height, col_width, text, fontsize, show_inserts) {
+      var y        = height - 4,
         fill     = '#ffffff',
         textfill = '#555555';
+
+      if (show_inserts) {
+        y = height - 35;
+      }
+
+      console.log(y);
 
       if (text < 0.75) {
         fill     = '#2171b5';
@@ -480,12 +500,12 @@
       context.moveTo(55, 1);
       context.lineTo(40, 1);
 
-      context.moveTo(55, 256);
-      context.lineTo(40, 256);
+      context.moveTo(55, this.info_content_height);
+      context.lineTo(40, this.info_content_height);
 
 
-      context.moveTo(55, (256 / 2));
-      context.lineTo(40, (256 / 2));
+      context.moveTo(55, (this.info_content_height / 2));
+      context.lineTo(40, (this.info_content_height / 2));
       context.lineWidth = 1;
       context.strokeStyle = "#666666";
       context.stroke();
@@ -501,9 +521,9 @@
       context.textBaseline = "middle";
 
       // draw the midpoint labels
-      context.fillText(parseFloat(this.data.max_height / 2).toFixed(1), 38, (256 / 2));
+      context.fillText(parseFloat(this.data.max_height / 2).toFixed(1), 38, (this.info_content_height / 2));
       // draw the min label
-      context.fillText('0', 38, 256);
+      context.fillText('0', 38, this.info_content_height);
 
       // draw the axis label
       if (this.data.height_calc === 'score') {
@@ -519,9 +539,11 @@
       context.restore();
 
       // draw the insert row labels
-      context.fillText('occupancy', 55, 263);
-      context.fillText('ins. prob.', 50, 280);
-      context.fillText('ins. len.', 46, 296);
+      context.fillText('occupancy', 55, this.info_content_height + 7);
+      if (this.show_inserts) {
+        context.fillText('ins. prob.', 50, 280);
+        context.fillText('ins. len.', 46, 296);
+      }
     };
 
     this.render_x_axis_label();
@@ -537,12 +559,12 @@
         total_height = top_height + Math.abs(bottom_height),
         top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height),
         //convert % to pixels
-        top_pix_height = Math.round((256 * top_percentage) / 100),
-        bottom_pix_height = 256 - top_pix_height,
+        top_pix_height = Math.round((this.info_content_height * top_percentage) / 100),
+        bottom_pix_height = this.info_content_height - top_pix_height,
         // this is used to transform the 256px high letters into the correct size
         // when displaying negative values, so that they fit above the 0 line.
-        top_pix_conversion = top_pix_height / 256,
-        bottom_pix_conversion = bottom_pix_height / 256;
+        top_pix_conversion = top_pix_height / this.info_content_height,
+        bottom_pix_conversion = bottom_pix_height / this.info_content_height;
 
       // add 3 extra columns so that numbers don't get clipped at the end of a canvas
       // that ends before a large column. DF0000830 was suffering at zoom level 0.6,
@@ -574,8 +596,8 @@
               // just squash them out.
               if (values[1] > 0.01) {
                 letter_height = parseFloat(values[1]) / this.data.max_height;
-                var y_pos = 255 - previous_height;
-                var glyph_height = 255 * letter_height;
+                var y_pos = (this.info_content_height - 2) - previous_height,
+                  glyph_height = (this.info_content_height - 2) * letter_height;
 
                 // The positioning in IE is off, so we need to modify the y_pos when
                 // canvas is not supported and we are using VML instead.
@@ -598,12 +620,6 @@
           }
         }
 
-        //draw insert length ticks
-        draw_ticks(this.contexts[context_num], x, this.height - 15, 5);
-        // draw insert probability ticks
-        draw_ticks(this.contexts[context_num], x, this.height - 30, 5);
-        // draw delete probability ticks
-        draw_ticks(this.contexts[context_num], x, this.height - 45, 5);
 
         // if ali_coordinates exist and toggle is set then display the
         // alignment coordinates and not the model coordinates.
@@ -632,9 +648,18 @@
           });
         }
 
-        draw_delete_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.delete_probs[i - 1], fontsize);
-        draw_insert_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.insert_probs[i - 1], fontsize);
-        draw_insert_length(this.contexts[context_num], x, this.height - 5, this.zoomed_column, this.data.insert_lengths[i - 1], fontsize);
+        draw_delete_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.delete_probs[i - 1], fontsize, this.show_inserts);
+        //draw insert length ticks
+        draw_ticks(this.contexts[context_num], x, this.height - 15, 5);
+        if (this.show_inserts) {
+          draw_insert_odds(this.contexts[context_num], x, this.height, this.zoomed_column, this.data.insert_probs[i - 1], fontsize);
+          draw_insert_length(this.contexts[context_num], x, this.height - 5, this.zoomed_column, this.data.insert_lengths[i - 1], fontsize);
+
+          // draw delete probability ticks
+          draw_ticks(this.contexts[context_num], x, this.height - 45, 5);
+          // draw insert probability ticks
+          draw_ticks(this.contexts[context_num], x, this.height - 30, 5);
+        }
 
         x += this.zoomed_column;
         column_num++;
@@ -642,9 +667,11 @@
 
 
       // draw other dividers
+      if (this.show_inserts) {
+        draw_border(this.contexts[context_num], this.height - 30, this.total_width);
+        draw_border(this.contexts[context_num], this.height - 45, this.total_width);
+      }
       draw_border(this.contexts[context_num], this.height - 15, this.total_width);
-      draw_border(this.contexts[context_num], this.height - 30, this.total_width);
-      draw_border(this.contexts[context_num], this.height - 45, this.total_width);
       draw_border(this.contexts[context_num], 0, this.total_width);
     };
 
@@ -669,8 +696,8 @@
         total_height = top_height + bottom_height,
         top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height),
         //convert % to pixels
-        top_pix_height = Math.round((256 * top_percentage) / 100),
-        bottom_pix_height = 256 - top_pix_height,
+        top_pix_height = Math.round((this.info_content_height * top_percentage) / 100),
+        bottom_pix_height = this.info_content_height - top_pix_height,
         mod = 10;
 
       for (i = start; i <= end; i++) {
@@ -689,8 +716,8 @@
             if (values[1] > 0.01) {
               var letter_height = parseFloat(values[1]) / this.data.max_height,
                 x_pos = x,
-                glyph_height = 256 * letter_height,
-                y_pos = 256 - previous_height - glyph_height;
+                glyph_height = (this.info_content_height - 2) * letter_height,
+                y_pos = (this.info_content_height - 2) - previous_height - glyph_height;
 
               if (borders) {
                 this.contexts[context_num].strokeStyle = this.colors[values[0]];
@@ -738,11 +765,17 @@
           this.zoomed_column,
           this.data.insert_probs[i - 1],
           this.data.insert_lengths[i - 1],
-          this.data.delete_probs[i - 1]
+          this.data.delete_probs[i - 1],
+          this.show_inserts
         );
 
         // draw other dividers
-        draw_border(this.contexts[context_num], this.height - 45, this.total_width);
+        if (this.show_inserts) {
+          draw_border(this.contexts[context_num], this.height - 45, this.total_width);
+        } else {
+          draw_border(this.contexts[context_num], this.height - 15, this.total_width);
+        }
+
         draw_border(this.contexts[context_num], 0, this.total_width);
 
         x += this.zoomed_column;
