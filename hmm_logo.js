@@ -276,8 +276,6 @@
         y = height - 35;
       }
 
-      console.log(y);
-
       if (text < 0.75) {
         fill     = '#2171b5';
         textfill = '#ffffff';
