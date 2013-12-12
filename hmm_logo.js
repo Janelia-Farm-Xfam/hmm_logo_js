@@ -80,17 +80,19 @@
         };
 
       for (type in scoreref) {
-        if (scoreref[type] >= threshold) {
-          a = classSize[type] || 1;
-          b = classSize[bestclass] || 1;
+        if (scoreref.hasOwnProperty(type)) {
+          if (scoreref[type] >= threshold) {
+            a = classSize[type] || 1;
+            b = classSize[bestclass] || 1;
 
-          if (a < b) {
-            bestclass = type;
-            bestscore = scoreref[type];
-          } else if (a === b) {
-            if (scoreref[type] > bestscore) {
+            if (a < b) {
               bestclass = type;
               bestscore = scoreref[type];
+            } else if (a === b) {
+              if (scoreref[type] > bestscore) {
+                bestclass = type;
+                bestscore = scoreref[type];
+              }
             }
           }
         }
@@ -507,19 +509,25 @@
 
     this.canvas_width = 5000;
 
+    var letter = null,
+      probs_arr = null,
+      loptions = null,
+      cc = null;
+
     if (this.alphabet === 'aa') {
-      var probs_arr = this.data.probs_arr,
-        cc = new ConsensusColors();
+      probs_arr = this.data.probs_arr;
+      cc = new ConsensusColors();
       this.cmap = cc.color_map(probs_arr);
     }
 
     //build the letter canvases
     this.letters = {};
-    var letter = null;
 
     for (letter in this.colors) {
-      var loptions = {color: this.colors[letter]};
-      this.letters[letter] = new Letter(letter, loptions);
+      if (this.colors.hasOwnProperty(letter)) {
+        loptions = {color: this.colors[letter]};
+        this.letters[letter] = new Letter(letter, loptions);
+      }
     }
 
     // this needs to be set to null here so that we can initialise it after
@@ -695,6 +703,8 @@
         scaled = options.scaled || null,
         parent_width = $(this.dom_element).parent().width(),
         max_canvas_width = 1,
+        end = null,
+        start = null,
         i = 0;
 
       if (target === this.previous_target) {
@@ -719,8 +729,8 @@
 
       this.zoom = zoom;
 
-      var end = this.end || this.data.height_arr.length;
-      var start = this.start || 1;
+      end = this.end || this.data.height_arr.length;
+      start = this.start || 1;
       end     = (end > this.data.height_arr.length) ? this.data.height_arr.length : end;
       end     = (end < start) ? start : end;
 
@@ -857,12 +867,14 @@
         top_pix_height = 0,
         bottom_pix_height = 0,
         top_height = Math.abs(this.data.max_height),
-        bottom_height = (isNaN(this.data.min_height_obs)) ? 0 : parseInt(this.data.min_height_obs, 10);
+        bottom_height = (isNaN(this.data.min_height_obs)) ? 0 : parseInt(this.data.min_height_obs, 10),
+        context = null,
+        axis_label = "Information Content (bits)";
       if (!canvasSupport()) {
         canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
       }
-      var context = canvas[0].getContext('2d'),
-        axis_label = "Information Content (bits)";
+
+      context = canvas[0].getContext('2d');
       //draw min/max tick marks
       context.beginPath();
       context.moveTo(55, 1);
@@ -1212,7 +1224,8 @@
     };
 
     this.change_zoom = function (options) {
-      var zoom_level = 0.3;
+      var zoom_level = 0.3,
+        expected_width = null;
       if (options.target) {
         zoom_level = options.target;
       } else if (options.distance) {
@@ -1229,7 +1242,7 @@
       }
 
       // see if we need to zoom or not
-      var expected_width = ($(this.called_on).find('.logo_graphic').width() * zoom_level) / this.zoom;
+      expected_width = ($(this.called_on).find('.logo_graphic').width() * zoom_level) / this.zoom;
       if (expected_width > $(this.called_on).find('.logo_container').width()) {
         // if a center is not specified, then use the current center of the view
         if (!options.column) {
