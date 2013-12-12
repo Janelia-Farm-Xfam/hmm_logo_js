@@ -964,7 +964,9 @@
             var previous_height = 0,
               letters = column.length,
               previous_neg_height = top_pix_height,
-              j = 0;
+              j = 0,
+              color = null;
+
             for (j = 0; j < letters; j++) {
               var letter = column[j],
                 values = letter.split(':', 2),
@@ -994,7 +996,9 @@
             // don't clobber the smaller letters below them.
             for (j = letters; j >= 0; j--) {
               if (col_positions[j] && this.letters[column[j][0]]) {
-                var color = this.cmap[i - 1][column[j][0]] || "#7a7a7a";
+                color = this.cmap[i - 1][column[j][0]] || "#7a7a7a";
+                // remove or comment the next line to get the consensus colors in the graphic
+                color = null;
                 this.letters[column[j][0]].draw(this.contexts[context_num], col_positions[j][0], col_positions[j][1], col_positions[j][2], col_positions[j][3], color);
               }
             }
