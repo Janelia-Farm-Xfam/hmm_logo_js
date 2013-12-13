@@ -440,6 +440,8 @@
       this.zoom_enabled = true;
     }
 
+    this.colorscheme = options.colorscheme || 'default';
+
     // never show the alignment coordinates by default as that would get
     // really confusing.
     this.display_ali_map = 0;
@@ -996,9 +998,11 @@
             // don't clobber the smaller letters below them.
             for (j = letters; j >= 0; j--) {
               if (col_positions[j] && this.letters[column[j][0]]) {
-                color = this.cmap[i - 1][column[j][0]] || "#7a7a7a";
-                // remove or comment the next line to get the consensus colors in the graphic
-                color = null;
+                if (this.colorscheme === 'consensus') {
+                  color = this.cmap[i - 1][column[j][0]] || "#7a7a7a";
+                } else {
+                  color = null;
+                }
                 this.letters[column[j][0]].draw(this.contexts[context_num], col_positions[j][0], col_positions[j][1], col_positions[j][2], col_positions[j][3], color);
               }
             }
@@ -1169,6 +1173,28 @@
 
     };
 
+    this.toggle_colorscheme = function () {
+      // work out the current column we are on so we can return there
+      var col_total = this.current_column();
+
+      if (this.colorscheme === 'default') {
+        this.colorscheme = 'consensus';
+      } else {
+        this.colorscheme = 'default';
+      }
+
+      // reset the rendered counter so that each section will re-render
+      // with the new heights
+      this.rendered = [];
+
+      // re-flow and re-render the content
+      this.scrollme.reflow();
+      //scroll off by one to force a render of the canvas.
+      this.scrollToColumn(col_total + 1);
+      //scroll back to the location we started at.
+      this.scrollToColumn(col_total);
+    };
+
     this.toggle_scale = function () {
       // work out the current column we are on so we can return there
       var col_total = this.current_column();
@@ -1333,6 +1359,10 @@
         controls.append('<button class="logo_scale button">Toggle Scale</button>');
       }
 
+      if (logo.data.height_calc !== 'score' && logo.data.alphabet === 'aa') {
+        controls.append('<button class="logo_color button">Toggle Color Scheme</button>');
+      }
+
       if (logo.data.ali_map) {
         controls.append('<button class="logo_ali_map button">Toggle Alignment Coordinates</button>');
       }
@@ -1367,6 +1397,12 @@
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.toggle_scale();
+      });
+
+      $(this).find('.logo_color').bind('click', function (e) {
+        e.preventDefault();
+        var hmm_logo = logo;
+        hmm_logo.toggle_colorscheme();
       });
 
       $(this).find('.logo_ali_map').bind('click', function (e) {
