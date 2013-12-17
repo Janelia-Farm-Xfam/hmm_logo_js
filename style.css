@@ -72,6 +72,10 @@
   float:left;
 }
 
+.logo_settings {
+  display:none;
+}
+
 .aa_A div {
   background: #FF9966;
 }

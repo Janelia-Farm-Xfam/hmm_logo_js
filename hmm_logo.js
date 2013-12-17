@@ -518,8 +518,10 @@
 
     if (this.alphabet === 'aa') {
       probs_arr = this.data.probs_arr;
-      cc = new ConsensusColors();
-      this.cmap = cc.color_map(probs_arr);
+      if (probs_arr) {
+        cc = new ConsensusColors();
+        this.cmap = cc.color_map(probs_arr);
+      }
     }
 
     //build the letter canvases
@@ -1173,14 +1175,22 @@
 
     };
 
-    this.toggle_colorscheme = function () {
+    this.toggle_colorscheme = function (scheme) {
       // work out the current column we are on so we can return there
       var col_total = this.current_column();
 
-      if (this.colorscheme === 'default') {
-        this.colorscheme = 'consensus';
+      if (scheme) {
+        if (scheme === 'default') {
+          this.colorscheme = 'default';
+        } else {
+          this.colorscheme = 'consensus';
+        }
       } else {
-        this.colorscheme = 'default';
+        if (this.colorscheme === 'default') {
+          this.colorscheme = 'consensus';
+        } else {
+          this.colorscheme = 'default';
+        }
       }
 
       // reset the rendered counter so that each section will re-render
@@ -1195,15 +1205,23 @@
       this.scrollToColumn(col_total);
     };
 
-    this.toggle_scale = function () {
+    this.toggle_scale = function (scale) {
       // work out the current column we are on so we can return there
       var col_total = this.current_column();
 
-      // toggle the max height
-      if (this.data.max_height === this.data.max_height_obs) {
-        this.data.max_height = this.data.max_height_theory;
+      if (scale) {
+        if (scale === 'obs') {
+          this.data.max_height = this.data.max_height_obs;
+        } else {
+          this.data.max_height = this.data.max_height_theory;
+        }
       } else {
-        this.data.max_height = this.data.max_height_obs;
+        // toggle the max height
+        if (this.data.max_height === this.data.max_height_obs) {
+          this.data.max_height = this.data.max_height_theory;
+        } else {
+          this.data.max_height = this.data.max_height_obs;
+        }
       }
       // reset the rendered counter so that each section will re-render
       // with the new heights
@@ -1220,15 +1238,23 @@
       this.scrollToColumn(col_total);
     };
 
-    this.toggle_ali_map = function () {
+    this.toggle_ali_map = function (coords) {
       // work out the current column we are on so we can return there
       var col_total = this.current_column();
 
-      // toggle the max height
-      if (this.display_ali_map === 1) {
-        this.display_ali_map = 0;
+      if (coords) {
+        if (coords === 'model') {
+          this.display_ali_map = 0;
+        } else {
+          this.display_ali_map = 1;
+        }
       } else {
-        this.display_ali_map = 1;
+        // toggle the max height
+        if (this.display_ali_map === 1) {
+          this.display_ali_map = 0;
+        } else {
+          this.display_ali_map = 1;
+        }
       }
       this.render_x_axis_label();
 
@@ -1342,7 +1368,8 @@
           '<input type="text" name="position" class="logo_position"></input>' +
           '<button class="button logo_change">Go</button></fieldset>' +
           '</form>'),
-        controls = $('<div class="logo_controls">');
+        controls = $('<div class="logo_controls">'),
+        settings = $('<div class="logo_settings">');
 
       logo = new HMMLogo(options);
       logo.render(options);
@@ -1356,20 +1383,110 @@
        * as letters will fall off the top.
        */
       if (logo.scale_height_enabled && (logo.data.max_height_obs < logo.data.max_height_theory)) {
-        controls.append('<button class="logo_scale button">Toggle Scale</button>');
+        var obs_checked = '',
+          theory_checked = '',
+          theory_help = '',
+          obs_help = '';
+
+        if (logo.data.max_height_obs === logo.data.max_height) {
+          obs_checked = 'checked';
+        } else {
+          theory_checked = 'checked';
+        }
+
+        if (options.help) {
+          obs_help = '<a class="help" href="/help#scale_obs" title="Set the y-axis maximum to the maximum observed height.">' +
+            '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
+          theory_help = '<a class="help" href="/help#scale_theory" title="Set the y-axis maximum to the theoretical maximum height">' +
+            '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
+        }
+
+        var scale_controls = '<fieldset><legend>Scale</legend>' +
+          '<label><input type="radio" name="scale" class="logo_scale" value="obs" ' + obs_checked +
+          '/>Maximum Observed ' + obs_help +
+          '</label></br>' +
+          '<label><input type="radio" name="scale" class="logo_scale" value="theory" ' + theory_checked +
+          '/>Maximum Theoretical ' + theory_help +
+          '</label>' +
+          '</fieldset>';
+
+        settings.append(scale_controls);
       }
 
-      if (logo.data.height_calc !== 'score' && logo.data.alphabet === 'aa') {
-        controls.append('<button class="logo_color button">Toggle Color Scheme</button>');
+      if (logo.data.height_calc !== 'score' && logo.data.alphabet === 'aa' && logo.data.probs_arr) {
+
+        var def_color = null,
+          con_color = null,
+          def_help = '',
+          con_help = '';
+
+        if (logo.colorscheme === 'default') {
+          def_color = 'checked';
+        } else {
+          con_color = 'checked';
+        };
+
+        if (options.help) {
+          def_help = '<a class="help" href="/help#colors_default" title="">' +
+            '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
+          con_help = '<a class="help" href="/help#colors_consensus" title="">' +
+            '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
+        }
+
+        var color_controls = '<fieldset><legend>Color Scheme</legend>' +
+          '<label><input type="radio" name="color" class="logo_color" value="default" ' + def_color +
+          '/>Default ' + def_help +
+          '</label></br>' +
+          '<label><input type="radio" name="color" class="logo_color" value="consensus" ' + con_color +
+          '/>Consensus Colors ' + con_help +
+          '</label>' +
+          '</fieldset>';
+        settings.append(color_controls);
       }
 
       if (logo.data.ali_map) {
-        controls.append('<button class="logo_ali_map button">Toggle Alignment Coordinates</button>');
+        var mod_checked = null,
+          ali_checked = null,
+          mod_help = '',
+          ali_help = '';
+
+        if (logo.display_ali_map === 0) {
+          mod_checked = 'checked';
+        } else {
+          ali_checked = 'checked';
+        }
+
+        if (options.help) {
+          mod_help = '<a class="help" href="/help#coords_model" title="">' +
+            '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
+          ali_help = '<a class="help" href="/help#coords_ali" title="">' +
+            '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
+        }
+
+        var ali_controls = '<fieldset><legend>Coordinates</legend>' +
+          '<label><input type="radio" name="coords" class="logo_ali_map" value="model" ' + mod_checked +
+          '/>Model ' + mod_help +
+          '</label></br>' +
+          '<label><input type="radio" name="coords" class="logo_ali_map" value="alignment" ' + ali_checked +
+          '/>Alignment ' + ali_help +
+          '</label>' +
+          '</fieldset>';
+        settings.append(ali_controls);
+      }
+
+      if (settings.children().length > 0) {
+        controls.append('<button class="logo_settings_switch button">Settings</button>');
+        controls.append(settings);
       }
 
       form.append(controls);
       $(this).append(form);
 
+
+      $(this).find('.logo_settings_switch').bind('click', function (e) {
+        e.preventDefault();
+        $('.logo_settings').toggle();
+      });
 
       $(this).find('.logo_reset').bind('click', function (e) {
         e.preventDefault();
@@ -1393,22 +1510,19 @@
         hmm_logo.change_zoom({'distance': 0.1, 'direction': '-'});
       });
 
-      $(this).find('.logo_scale').bind('click', function (e) {
-        e.preventDefault();
+      $(this).find('.logo_scale').bind('change', function (e) {
         var hmm_logo = logo;
-        hmm_logo.toggle_scale();
+        hmm_logo.toggle_scale(this.value);
       });
 
-      $(this).find('.logo_color').bind('click', function (e) {
-        e.preventDefault();
+      $(this).find('.logo_color').bind('change', function (e) {
         var hmm_logo = logo;
-        hmm_logo.toggle_colorscheme();
+        hmm_logo.toggle_colorscheme(this.value);
       });
 
-      $(this).find('.logo_ali_map').bind('click', function (e) {
-        e.preventDefault();
+      $(this).find('.logo_ali_map').bind('change', function (e) {
         var hmm_logo = logo;
-        hmm_logo.toggle_ali_map();
+        hmm_logo.toggle_ali_map(this.value);
       });
 
       $(this).find('.logo_position').bind('change', function () {
@@ -1494,13 +1608,17 @@
             tbody += '<tr>';
             j = i;
             while (col_data[j]) {
-              var values = col_data[j].split(':', 2);
+              var values = col_data[j].split(':', 2),
+                color = '';
+              if (logo.colorscheme === 'default') {
+                color = logo.alphabet + '_' + values[0];
+              }
               // using the j < 15 check to make sure the last column doesn't get marked
               // with the odd class so we don't get a border on the edge of the table.
               if (info_cols > 1  &&  j < 15) {
-                tbody += '<td class="' + logo.alphabet + '_' + values[0] + '"><div></div>' + values[0] + '</td><td class="odd">' + values[1] + '</td>';
+                tbody += '<td class="' + color + '"><div></div>' + values[0] + '</td><td class="odd">' + values[1] + '</td>';
               } else {
-                tbody += '<td class="' + logo.alphabet + '_' + values[0] + '"><div></div>' + values[0] + '</td><td>' + values[1] + '</td>';
+                tbody += '<td class="' + color + '"><div></div>' + values[0] + '</td><td>' + values[1] + '</td>';
               }
 
               j += 5;
