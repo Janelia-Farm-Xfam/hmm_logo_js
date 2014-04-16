@@ -1108,13 +1108,20 @@
               var letter_height = parseFloat(values[1]) / this.data.max_height,
                 x_pos = x,
                 glyph_height = (this.info_content_height - 2) * letter_height,
-                y_pos = (this.info_content_height - 2) - previous_height - glyph_height;
+                y_pos = (this.info_content_height - 2) - previous_height - glyph_height,
+                color = null;
+
+              if(this.colorscheme === 'consensus') {
+                color = this.cmap[i - 1][values[0]] || "#7a7a7a";
+              } else {
+                color = this.colors[values[0]];
+              }
 
               if (borders) {
-                this.contexts[context_num].strokeStyle = this.colors[values[0]];
+                this.contexts[context_num].strokeStyle = color;
                 this.contexts[context_num].strokeRect(x_pos, y_pos, this.zoomed_column, glyph_height);
               } else {
-                this.contexts[context_num].fillStyle = this.colors[values[0]];
+                this.contexts[context_num].fillStyle = color;
                 this.contexts[context_num].fillRect(x_pos, y_pos, this.zoomed_column, glyph_height);
               }
 
