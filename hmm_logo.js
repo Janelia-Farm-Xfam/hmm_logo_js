@@ -1371,6 +1371,8 @@
         controls = $('<div class="logo_controls">'),
         settings = $('<div class="logo_settings">');
 
+      settings.append('<span class="close">x</span>');
+
       logo = new HMMLogo(options);
       logo.render(options);
 
@@ -1483,7 +1485,7 @@
       $(this).append(form);
 
 
-      $(this).find('.logo_settings_switch').bind('click', function (e) {
+      $(this).find('.logo_settings_switch, .logo_settings .close').bind('click', function (e) {
         e.preventDefault();
         $('.logo_settings').toggle();
       });
