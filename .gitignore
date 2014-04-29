@@ -1,5 +1,4 @@
-dfam
-scroller
-excanvas
-*.min.js
-*.min.css
+/build
+/node_modules
+
+
