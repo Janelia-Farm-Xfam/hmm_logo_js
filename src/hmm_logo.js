@@ -1436,9 +1436,9 @@
         };
 
         if (options.help) {
-          def_help = '<a class="help" href="/help#colors_default" title="">' +
+          def_help = '<a class="help" href="/help#colors_default" title="Each letter receives its own color.">' +
             '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
-          con_help = '<a class="help" href="/help#colors_consensus" title="">' +
+          con_help = '<a class="help" href="/help#colors_consensus" title="Letters are colored as in Clustalx and Jalview, with colors depending on composition of the column.">' +
             '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
         }
 
