@@ -2,10 +2,10 @@
 /*global G_vmlCanvasManager, EasyScroller */
 /** @license
  * HMM logo
- * http://github.com/url/here
+ * https://github.com/Janelia-Farm-Xfam/hmm_logo_js
  * Copyright 2013, Jody Clements.
  * Licensed under the MIT License.
- * http://url/to/license
+ * https://github.com/Janelia-Farm-Xfam/hmm_logo_js/blob/master/LICENSE.txt
  */
 
 (function ($) {
