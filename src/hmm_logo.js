@@ -1466,9 +1466,9 @@
         }
 
         if (options.help) {
-          mod_help = '<a class="help" href="/help#coords_model" title="">' +
+          mod_help = '<a class="help" href="/help#coords_model" title="The coordinates along the top of the plot show the model position.">' +
             '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
-          ali_help = '<a class="help" href="/help#coords_ali" title="">' +
+          ali_help = '<a class="help" href="/help#coords_ali" title="The coordinates along the top of the plot show the column in the alignment associated with the model">' +
             '<span aria-hidden="true" data-icon="?"></span><span class="reader-text">help</span></a>';
         }
 
